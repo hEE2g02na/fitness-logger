@@ -11,48 +11,60 @@
 <body>
   <h1>Fitness Logger</h1>
 
-  <section id="theme-toggle">
+  <!-- 🏋️ LOG TAB -->
+  <div class="tab" data-tab="log">
+    <form id="entryForm">
+      <input type="date" id="date" required />
+      <input type="text" id="exercise" placeholder="Exercise" required />
+      <input type="number" id="sets" placeholder="Sets" required />
+      <input type="number" id="reps" placeholder="Reps" required />
+      <input type="number" id="weight" placeholder="Weight (lbs)" />
+      <select id="category">
+        <option value="Strength">Strength</option>
+        <option value="Cardio">Cardio</option>
+        <option value="Flexibility">Flexibility</option>
+      </select>
+      <button type="submit">Add Entry</button>
+    </form>
+
+    <section id="filters">
+      <input type="text" id="filterExercise" placeholder="Filter by Exercise" />
+      <input type="date" id="filterDate" />
+      <select id="filterCategory">
+        <option value="">All</option>
+        <option value="Strength">Strength</option>
+        <option value="Cardio">Cardio</option>
+        <option value="Flexibility">Flexibility</option>
+      </select>
+    </section>
+
+    <ul id="logList"></ul>
+  </div>
+
+  <!-- 📊 SUMMARY TAB -->
+  <div class="tab" data-tab="summary" style="display:none;">
+    <section id="summary">
+      <h3>Weekly Summary</h3>
+      <p id="weeklySummary"></p>
+    </section>
+    <canvas id="chart" width="400" height="200"></canvas>
+  </div>
+
+  <!-- ⚙️ SETTINGS TAB -->
+  <div class="tab" data-tab="settings" style="display:none;">
+    <h2>Settings</h2>
     <button id="toggleTheme">Toggle Dark/Light Theme</button>
-  </section>
-
-  <form id="entryForm">
-    <input type="date" id="date" required />
-    <input type="text" id="exercise" placeholder="Exercise" required />
-    <input type="number" id="sets" placeholder="Sets" required />
-    <input type="number" id="reps" placeholder="Reps" required />
-    <input type="number" id="weight" placeholder="Weight (lbs)" />
-    <select id="category">
-      <option value="Strength">Strength</option>
-      <option value="Cardio">Cardio</option>
-      <option value="Flexibility">Flexibility</option>
-    </select>
-    <button type="submit">Add Entry</button>
-  </form>
-
-  <section id="filters">
-    <input type="text" id="filterExercise" placeholder="Filter by Exercise" />
-    <input type="date" id="filterDate" />
-    <select id="filterCategory">
-      <option value="">All</option>
-      <option value="Strength">Strength</option>
-      <option value="Cardio">Cardio</option>
-      <option value="Flexibility">Flexibility</option>
-    </select>
-  </section>
-
-  <section>
+    <button id="toggleLayout">Switch to Top Nav (coming soon)</button>
     <button id="exportJSON">Export JSON</button>
     <button id="exportCSV">Export CSV</button>
-  </section>
+  </div>
 
-  <section id="summary">
-    <h3>Weekly Summary</h3>
-    <p id="weeklySummary"></p>
-  </section>
-
-  <ul id="logList"></ul>
-
-  <canvas id="chart" width="400" height="200"></canvas>
+  <!-- 🔘 NAVBAR -->
+  <nav id="navbar">
+    <button data-tab="log">🏋️</button>
+    <button data-tab="summary">📊</button>
+    <button data-tab="settings">⚙️</button>
+  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
