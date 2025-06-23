@@ -1,31 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="style.css" />
-    <meta name="theme-color" content="#4CAF50" />
-    <title>Fitness Logger</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#4CAF50" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Fitness Logger</title>
 </head>
 <body>
-<h1>Fitness Logger</h1>
-<form id="entryForm">
+  <h1>Fitness Logger</h1>
+
+  <section id="theme-toggle">
+    <button id="toggleTheme">Toggle Dark/Light Theme</button>
+  </section>
+
+  <form id="entryForm">
     <input type="date" id="date" required />
     <input type="text" id="exercise" placeholder="Exercise" required />
     <input type="number" id="sets" placeholder="Sets" required />
     <input type="number" id="reps" placeholder="Reps" required />
     <input type="number" id="weight" placeholder="Weight (lbs)" />
-    <button type="submit">Add</button>
-</form>
-<ul id="logList"></ul>
-<script src="script.js"></script>
-<script>
+    <select id="category">
+      <option value="Strength">Strength</option>
+      <option value="Cardio">Cardio</option>
+      <option value="Flexibility">Flexibility</option>
+    </select>
+    <button type="submit">Add Entry</button>
+  </form>
+
+  <section id="filters">
+    <input type="text" id="filterExercise" placeholder="Filter by Exercise" />
+    <input type="date" id="filterDate" />
+    <select id="filterCategory">
+      <option value="">All</option>
+      <option value="Strength">Strength</option>
+      <option value="Cardio">Cardio</option>
+      <option value="Flexibility">Flexibility</option>
+    </select>
+  </section>
+
+  <section>
+    <button id="exportJSON">Export JSON</button>
+    <button id="exportCSV">Export CSV</button>
+  </section>
+
+  <section id="summary">
+    <h3>Weekly Summary</h3>
+    <p id="weeklySummary"></p>
+  </section>
+
+  <ul id="logList"></ul>
+
+  <canvas id="chart" width="400" height="200"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+  <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js').catch(console.error);
-        });
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').catch(console.error);
+      });
     }
-</script>
+  </script>
 </body>
 </html>
