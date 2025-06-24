@@ -4,7 +4,6 @@ const filterExercise = document.getElementById('filterExercise');
 const filterDate = document.getElementById('filterDate');
 const filterCategory = document.getElementById('filterCategory');
 const summary = document.getElementById('weeklySummary');
-const toggleTheme = document.getElementById('toggleTheme');
 const chartCanvas = document.getElementById('chart');
 
 let logs = JSON.parse(localStorage.getItem('logs') || '[]');
@@ -13,36 +12,60 @@ function saveLogs() {
   localStorage.setItem('logs', JSON.stringify(logs));
 }
 
-function calculateWeeklySummary() {
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const filtered = logs.filter(log => new Date(log.date) >= weekAgo);
-  const totalVolume = filtered.reduce((sum, log) =>
-    sum + (log.sets * log.reps * (parseInt(log.weight) || 0)), 0);
-  summary.textContent = `Total Volume: ${totalVolume} lbs across ${filtered.length} workouts.`;
-}
-
 function renderLogs() {
   logList.innerHTML = '';
-  const filteredLogs = logs.filter(log =>
+  const filtered = logs.filter(log =>
     (!filterExercise.value || log.exercise.toLowerCase().includes(filterExercise.value.toLowerCase())) &&
     (!filterDate.value || log.date === filterDate.value) &&
     (!filterCategory.value || log.category === filterCategory.value)
   );
 
-  filteredLogs.forEach((log, i) => {
+  filtered.forEach((log, i) => {
     const li = document.createElement('li');
     li.innerHTML = `
       <strong>${log.date}</strong>: ${log.exercise} (${log.category}) – 
-      ${log.sets}x${log.reps} @ ${log.weight || 0}lbs
+      ${log.sets}x${log.reps} @ ${log.weight}lbs
       <button onclick="editLog(${i})">Edit</button>
       <button onclick="deleteLog(${i})">Delete</button>
     `;
     logList.appendChild(li);
   });
 
-  drawChart();
-  calculateWeeklySummary();
+  drawChart(filtered);
+  updateSummary(filtered);
+}
+
+function drawChart(data) {
+  const ctx = chartCanvas.getContext('2d');
+  if (window.chartInstance) window.chartInstance.destroy();
+  const labels = data.map(log => log.date);
+  const values = data.map(log => log.sets * log.reps * (parseInt(log.weight) || 0));
+  window.chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Volume Lifted',
+        data: values,
+        backgroundColor: '#4CAF50'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'Date' } },
+        y: { title: { display: true, text: 'Total Volume (lbs)' } }
+      }
+    }
+  });
+}
+
+function updateSummary(data) {
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const recent = data.filter(log => new Date(log.date) >= weekAgo);
+  const total = recent.reduce((sum, log) => sum + log.sets * log.reps * (parseInt(log.weight) || 0), 0);
+  summary.textContent = `Past 7 days: ${recent.length} workouts, ${total} lbs lifted`;
 }
 
 form.addEventListener('submit', e => {
@@ -61,71 +84,41 @@ form.addEventListener('submit', e => {
   form.reset();
 });
 
-function deleteLog(index) {
-  logs.splice(index, 1);
+function deleteLog(i) {
+  logs.splice(i, 1);
   saveLogs();
   renderLogs();
 }
 
-function editLog(index) {
-  const log = logs[index];
+function editLog(i) {
+  const log = logs[i];
   form.date.value = log.date;
   form.exercise.value = log.exercise;
   form.sets.value = log.sets;
   form.reps.value = log.reps;
   form.weight.value = log.weight;
   form.category.value = log.category;
-  logs.splice(index, 1);
+  logs.splice(i, 1);
   saveLogs();
+  renderLogs();
 }
 
-filterExercise.addEventListener('input', renderLogs);
-filterDate.addEventListener('input', renderLogs);
-filterCategory.addEventListener('change', renderLogs);
-toggleTheme.addEventListener('click', () => document.body.classList.toggle('dark'));
+document.querySelectorAll('#navbar button').forEach(btn =>
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab').forEach(div =>
+      div.style.display = div.dataset.tab === tab ? 'block' : 'none'
+    );
+  })
+);
+
+document.getElementById('toggleTheme').addEventListener('click', () =>
+  document.body.classList.toggle('dark')
+);
+
+document.getElementById('toggleLayout').addEventListener('click', () =>
+  alert('Alternate layout coming soon!')
+);
 
 document.getElementById('exportJSON').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
-  download(blob, 'fitness-logs.json');
-});
-
-document.getElementById('exportCSV').addEventListener('click', () => {
-  const csv = logs.map(log =>
-    `${log.date},${log.exercise},${log.sets},${log.reps},${log.weight},${log.category}`
-  ).join('\n');
-  const blob = new Blob([`Date,Exercise,Sets,Reps,Weight,Category\n${csv}`], { type: 'text/csv' });
-  download(blob, 'fitness-logs.csv');
-});
-
-function download(blob, filename) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-}
-
-function drawChart() {
-  const ctx = chartCanvas.getContext('2d');
-  if (window.chartInstance) window.chartInstance.destroy();
-  const labels = logs.map(l => l.date);
-  const data = logs.map(l => l.sets * l.reps * (parseInt(l.weight) || 0));
-  window.chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Volume Lifted',
-        data,
-        backgroundColor: '#4CAF50'
-      }]
-    },
-    options: {
-      scales: {
-        x: { title: { display: true, text: 'Date' } },
-        y: { title: { display: true, text: 'Total Volume (lbs)' } }
-      }
-    }
-  });
-}
-
-renderLogs();
+  const blob = new Blob([JSON.stringify(logs, null
