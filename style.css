@@ -16,6 +16,7 @@ body {
   padding: 20px;
   max-width: 600px;
   margin: auto;
+  padding-bottom: 80px;
 }
 
 form input, select {
@@ -30,12 +31,36 @@ button {
   margin-top: 5px;
   width: 100%;
   background-color: var(--primary);
-  color: #fff;
+  color: white;
   border: none;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
 }
 
 li {
   background: #f4f4f4;
   margin-top: 10px;
   padding: 10px;
+}
+
+#navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: var(--primary);
+  z-index: 10;
+}
+
+#navbar button {
+  flex: 1;
+  padding: 1rem;
+  font-size: 1.2rem;
+  color: white;
+  background: transparent;
+  border: none;
 }
