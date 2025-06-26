@@ -8,13 +8,13 @@
   <link rel="stylesheet" href="style.css" />
   <title>Fitness Logger</title>
 </head>
-<body>
-  <h1>Fitness Logger</h1>
+<body class="has-bottomnav">
+<div id="syncStatus">🔄 Syncing...</div>
 
-  <section id="theme-toggle">
-    <button id="toggleTheme">Toggle Dark/Light Theme</button>
-  </section>
+<h1>Fitness Logger</h1>
 
+<!-- 🏋️ LOG TAB -->
+<div class="tab active" data-tab="log">
   <form id="entryForm">
     <input type="date" id="date" required />
     <input type="text" id="exercise" placeholder="Exercise" required />
@@ -40,28 +40,57 @@
     </select>
   </section>
 
-  <section>
-    <button id="exportJSON">Export JSON</button>
-    <button id="exportCSV">Export CSV</button>
-  </section>
-
-  <section id="summary">
-    <h3>Weekly Summary</h3>
-    <p id="weeklySummary"></p>
-  </section>
-
   <ul id="logList"></ul>
+</div>
 
+<!-- 📊 SUMMARY TAB -->
+<div class="tab" data-tab="summary" style="display: none;">
+  <h3>Weekly Summary</h3>
+  <p id="weeklySummary"></p>
   <canvas id="chart" width="400" height="200"></canvas>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').catch(console.error);
-      });
-    }
-  </script>
+<!-- 📈 PERFORMANCE TAB -->
+<div class="tab" data-tab="performance" style="display: none;">
+  <h2>Performance Overview</h2>
+  <section id="performanceSummary">
+    <p>Loading performance data...</p>
+  </section>
+</div>
+
+<!-- ⚙️ SETTINGS TAB -->
+<div class="tab" data-tab="settings" style="display: none;">
+  <h2>Settings</h2>
+  <button id="toggleTheme">Toggle Dark/Light Theme</button>
+
+  <div id="layoutOptions">
+    <h3>Navigation Style</h3>
+    <label><input type="radio" name="layout" value="bottom" /> Bottom Tab Bar</label>
+    <label><input type="radio" name="layout" value="top" /> Top Nav Bar</label>
+  </div>
+
+  <button id="exportJSON">Export JSON</button>
+  <button id="exportCSV">Export CSV</button>
+</div>
+
+<!-- 🔘 NAVIGATION -->
+<div id="nav-wrapper">
+  <nav id="topnav">
+    <button data-tab="log">🏋️ Log</button>
+    <button data-tab="summary">📊 Summary</button>
+    <button data-tab="performance">📈 Performance</button>
+    <button data-tab="settings">⚙️ Settings</button>
+  </nav>
+
+  <nav id="navbar">
+    <button data-tab="log">🏋️</button>
+    <button data-tab="summary">📊</button>
+    <button data-tab="performance">📈</button>
+    <button data-tab="settings">⚙️</button>
+  </nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>

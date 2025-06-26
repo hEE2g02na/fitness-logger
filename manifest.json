@@ -1,11 +1,10 @@
 {
+  "short_name": "FitnessLog",
   "name": "Fitness Logger",
-  "short_name": "FitLog",
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4CAF50",
-  "description": "Track your workouts with ease.",
   "icons": [
     {
       "src": "icons/icon-192.png",
