@@ -1,96 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#4CAF50" />
-  <link rel="stylesheet" href="style.css" />
-  <title>Fitness Logger</title>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link href="manifest.json" rel="manifest"/>
+    <meta content="#4CAF50" name="theme-color"/>
+    <link href="style.css" rel="stylesheet"/>
+    <title>Fitness Logger</title>
+    <style>
+        .tab {
+            display: none;
+        }
+
+        .tab.active {
+            display: block;
+        }
+    </style>
 </head>
 <body class="has-bottomnav">
-<div id="syncStatus">🔄 Syncing...</div>
-
+<div id="syncStatus" title="Shows your sync/connection status">
+    <progress id="syncProgressBar" value="0" max="100" style="width:120px;vertical-align:middle;"></progress>
+    <span id="syncStatusLabel">🔄 Syncing...</span>
+</div>
 <h1>Fitness Logger</h1>
+
+<!-- Move navbar here, above all .tab elements -->
+<div class="navbar-container">
+    <nav aria-label="Main Navigation" id="navbar" role="tablist">
+        <button aria-current="page" aria-label="Log" data-tab="log" title="Go to Log tab">
+            <span class="nav-icon">🏋️</span>
+            <span class="nav-label">Log</span>
+        </button>
+        <button aria-label="Summary" data-tab="summary" title="Go to Summary tab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Summary</span>
+        </button>
+        <button aria-label="Performance" data-tab="performance" title="Go to Performance tab">
+            <span class="nav-icon">📈</span>
+            <span class="nav-label">Performance</span>
+        </button>
+        <button aria-label="Settings" data-tab="settings" title="Go to Settings tab">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Settings</span>
+        </button>
+    </nav>
+</div>
 
 <!-- 🏋️ LOG TAB -->
 <div class="tab active" data-tab="log">
-  <form id="entryForm">
-    <input type="date" id="date" required />
-    <input type="text" id="exercise" placeholder="Exercise" required />
-    <input type="number" id="sets" placeholder="Sets" required />
-    <input type="number" id="reps" placeholder="Reps" required />
-    <input type="number" id="weight" placeholder="Weight (lbs)" />
-    <select id="category">
-      <option value="Strength">Strength</option>
-      <option value="Cardio">Cardio</option>
-      <option value="Flexibility">Flexibility</option>
-    </select>
-    <button type="submit">Add Entry</button>
-  </form>
+    <form id="entryForm">
+        <input id="date" required title="Date of workout" type="date"/>
+        <input autocomplete="off" id="exercise" list="exerciseSuggestions" placeholder="Exercise" required title="Type exercise name"
+               type="text"/>
+        <datalist id="exerciseSuggestions"></datalist>
+        <input id="sets" placeholder="Sets" required title="Number of sets" type="number"/>
+        <input id="reps" placeholder="Reps" required title="Number of reps per set" type="number"/>
+        <input id="weight" placeholder="Weight (lbs)" title="Weight used (in pounds)" type="number"/>
+        <select id="category" title="Workout category">
+            <option value="Strength">Strength</option>
+            <option value="Cardio">Cardio</option>
+            <option value="Flexibility">Flexibility</option>
+        </select>
+        <input id="tags" placeholder="Tags (comma separated, e.g. push,core)" title="Add tags for smarter sorting"
+               type="text"/>
+        <button title="Add workout entry" type="submit">Add Entry</button>
+        <button id="addCircuitBtn" title="Add a circuit of exercises" type="button">Add Circuit</button>
+    </form>
 
-  <section id="filters">
-    <input type="text" id="filterExercise" placeholder="Filter by Exercise" />
-    <input type="date" id="filterDate" />
-    <select id="filterCategory">
-      <option value="">All</option>
-      <option value="Strength">Strength</option>
-      <option value="Cardio">Cardio</option>
-      <option value="Flexibility">Flexibility</option>
-    </select>
-  </section>
+    <!-- Circuit Builder Section -->
+    <section id="circuitBuilder" style="display:none; margin-top:1rem;">
+        <h4>Add Circuit</h4>
+        <div id="circuitExercises"></div>
+        <button id="addExerciseToCircuitBtn" title="Add exercise to circuit" type="button">Add Exercise to Circuit
+        </button>
+        <button id="saveCircuitBtn" title="Save circuit" type="button">Save Circuit</button>
+        <button id="cancelCircuitBtn" title="Cancel circuit" type="button">Cancel</button>
+    </section>
 
-  <ul id="logList"></ul>
+    <section id="filters">
+        <input id="filterExercise" placeholder="Filter by Exercise" title="Filter logs by exercise" type="text"/>
+        <input id="filterDate" title="Filter logs by date" type="date"/>
+        <select id="filterCategory" title="Filter logs by category">
+            <option value="">All</option>
+            <option value="Strength">Strength</option>
+            <option value="Cardio">Cardio</option>
+            <option value="Flexibility">Flexibility</option>
+        </select>
+        <input id="filterTags" placeholder="Filter by Tag" title="Filter logs by tag" type="text"/>
+    </section>
+
+    <ul id="logList"></ul>
 </div>
 
 <!-- 📊 SUMMARY TAB -->
-<div class="tab" data-tab="summary" style="display: none;">
-  <h3>Weekly Summary</h3>
-  <p id="weeklySummary"></p>
-  <canvas id="chart" width="400" height="200"></canvas>
+<div class="tab" data-tab="summary">
+    <h3>Weekly Summary</h3>
+    <div id="streakTracker" title="Your current workout streak"></div>
+    <p id="weeklySummary"></p>
+    <canvas data-chart="chart" height="200" id="chart" title="Bar chart of recent workouts" width="400"></canvas>
+    <table id="summaryTable" style="margin-top:1em; width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Exercise</th>
+                <th>Sets</th>
+                <th>Reps</th>
+                <th>Weight</th>
+                <th>Volume</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Filled by JS -->
+        </tbody>
+    </table>
 </div>
 
 <!-- 📈 PERFORMANCE TAB -->
-<div class="tab" data-tab="performance" style="display: none;">
-  <h2>Performance Overview</h2>
-  <section id="performanceSummary">
-    <p>Loading performance data...</p>
-  </section>
+<div class="tab" data-tab="performance">
+    <h2>Performance Overview</h2>
+    <section id="performanceSummary">
+        <p>Loading performance data...</p>
+    </section>
+    <section id="personalRecords">
+        <h3>🏅 Personal Records History</h3>
+        <ul id="prList"></ul>
+    </section>
+    <div data-chart="exerciseCharts" id="exerciseCharts" title="Separate charts for your top exercises"></div>
 </div>
 
 <!-- ⚙️ SETTINGS TAB -->
-<div class="tab" data-tab="settings" style="display: none;">
-  <h2>Settings</h2>
-  <button id="toggleTheme">Toggle Dark/Light Theme</button>
+<div class="tab" data-tab="settings">
+    <h2>Settings</h2>
+    <button id="toggleTheme" title="Switch between light and dark mode">Toggle Dark/Light Theme</button>
+    <!-- Sample Data Button will be injected here by JS -->
+    <section id="goalSetting">
+        <h3>🎯 Set Your Goals</h3>
+        <div class="settings-desc">Set daily or weekly targets to stay motivated. Progress is shown on the summary
+            tab.
+        </div>
+        <form id="goalForm">
+            <label title="Target total weight lifted per day">
+                Daily Volume Target (lbs):
+                <input id="goalVolume" min="0" title="Set your daily volume target" type="number"/>
+            </label>
+            <label title="Target number of sets per day">
+                Daily Sets Target:
+                <input id="goalSets" min="0" title="Set your daily sets target" type="number"/>
+            </label>
+            <label title="Target number of sessions per day">
+                Daily Sessions Target:
+                <input id="goalSessions" min="0" title="Set your daily sessions target" type="number"/>
+            </label>
+            <label title="Target total weight lifted per week">
+                Weekly Volume Target (lbs):
+                <input id="goalWeeklyVolume" min="0" title="Set your weekly volume target" type="number"/>
+            </label>
+            <button title="Save your goals" type="submit">Save Goals</button>
+        </form>
+        <div id="goalStatus"></div>
+    </section>
 
-  <div id="layoutOptions">
-    <h3>Navigation Style</h3>
-    <label><input type="radio" name="layout" value="bottom" /> Bottom Tab Bar</label>
-    <label><input type="radio" name="layout" value="top" /> Top Nav Bar</label>
-  </div>
+    <!-- Add Connection Test Button -->
+    <button id="openConnectionTest" title="Test your connection to the server">Test Connection</button>
 
-  <button id="exportJSON">Export JSON</button>
-  <button id="exportCSV">Export CSV</button>
+    <button id="exportJSON" title="Export your logs as a JSON file">Export JSON</button>
+    <button id="exportCSV" title="Export your logs as a CSV file">Export CSV</button>
+    <button id="exportPNG" title="Export main chart as PNG">Export Chart as PNG</button>
+    <button id="exportPDF" title="Export logs as PDF">Export PDF</button>
+    <button id="exportExcel" title="Export logs as Excel">Export Excel</button>
 </div>
 
-<!-- 🔘 NAVIGATION -->
-<div id="nav-wrapper">
-  <nav id="topnav">
-    <button data-tab="log">🏋️ Log</button>
-    <button data-tab="summary">📊 Summary</button>
-    <button data-tab="performance">📈 Performance</button>
-    <button data-tab="settings">⚙️ Settings</button>
-  </nav>
-
-  <nav id="navbar">
-    <button data-tab="log">🏋️</button>
-    <button data-tab="summary">📊</button>
-    <button data-tab="performance">📈</button>
-    <button data-tab="settings">⚙️</button>
-  </nav>
+<!-- Connection Test Modal/Screen -->
+<div id="connectionTestModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; display:flex; align-items:center; justify-content:center;">
+    <div style="
+        background: #fff;
+        padding: 2em 1.5em 1.5em 1.5em;
+        border-radius: 14px;
+        max-width: 350px;
+        width: 90vw;
+        margin: auto;
+        box-shadow: 0 4px 24px #0003;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1em;
+        ">
+        <button id="closeConnectionTest" style="
+            position: absolute;
+            top: 0.7em;
+            right: 0.7em;
+            background: none;
+            border: none;
+            width: 2em;
+            height: 2em;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        " title="Close" aria-label="Close connection test dialog">
+            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+                <line x1="6" y1="6" x2="16" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+                <line x1="16" y1="6" x2="6" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <h3 style="margin:0 0 0.5em 0; font-size:1.3em; color:#333;">Connection Test</h3>
+        <div id="connectionTestStatus" style="
+            margin-bottom: 0.5em;
+            min-height: 2.2em;
+            color: #444;
+            text-align: center;
+            font-size: 1em;
+        ">Press the button to test connection to Firestore.</div>
+        <button id="runConnectionTest" style="
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.6em 1.5em;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 2px 6px #0001;
+            transition: background 0.2s;
+        " onmouseover="this.style.background='#388e3c'" onmouseout="this.style.background='#4CAF50'">
+            Test Connection
+        </button>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module" src="script.js"></script>
+<script src="script.js" type="module"></script>
 </body>
 </html>
