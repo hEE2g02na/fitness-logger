@@ -12,14 +12,15 @@ import {
   enableIndexedDbPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Firebase config
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "XXXX",
-  appId: "XXXX"
+    apiKey: "AIzaSyAw335goNfYMw9KCOUBsHmRgzC2YSg7JRY",
+    authDomain: "fitness-logger-be74a.firebaseapp.com",
+    projectId: "fitness-logger-be74a",
+    storageBucket: "fitness-logger-be74a.firebasestorage.app",
+    messagingSenderId: "903626008062",
+    appId: "1:903626008062:web:60f646e03b9750967f8caf",
+    measurementId: "G-KDG1M2MP3N"
 };
 
 const app = initializeApp(firebaseConfig);
