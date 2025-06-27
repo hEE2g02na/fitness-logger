@@ -56,11 +56,6 @@ const circuitExercisesDiv = document.getElementById("circuitExercises");
 const addExerciseToCircuitBtn = document.getElementById("addExerciseToCircuitBtn");
 const saveCircuitBtn = document.getElementById("saveCircuitBtn");
 const cancelCircuitBtn = document.getElementById("cancelCircuitBtn");
-const openConnectionTestBtn = document.getElementById("openConnectionTest");
-const connectionTestModal = document.getElementById("connectionTestModal");
-const closeConnectionTestBtn = document.getElementById("closeConnectionTest");
-const runConnectionTestBtn = document.getElementById("runConnectionTest");
-const connectionTestStatus = document.getElementById("connectionTestStatus");
 
 let logs = [];
 let editingId = null;
@@ -358,19 +353,24 @@ function renderLogs() {
 }
 
 // Weekly summary
-function updateSummary(data) {
+function updateSummary(filteredData) {
+    // Use filteredData for the summary text
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const recent = data.filter(log => new Date(log.date) >= weekAgo);
+    const recent = filteredData.filter(log => new Date(log.date) >= weekAgo);
     const total = recent.reduce((sum, log) => sum + log.sets * log.reps * log.weight, 0);
     summary.textContent = `Past 7 days: ${recent.length} workouts, ${total} lbs lifted`;
 
-    // --- Fill summary table ---
+    // --- Fill summary table with last 7 days from ALL logs, not just filtered ---
     const summaryTable = document.getElementById("summaryTable");
     if (summaryTable) {
         const tbody = summaryTable.querySelector("tbody");
         tbody.innerHTML = "";
-        recent.forEach(log => {
+        // Always use the last 7 days from the full logs array
+        const weekAgoAll = new Date();
+        weekAgoAll.setDate(weekAgoAll.getDate() - 7);
+        const recentAll = logs.filter(log => new Date(log.date) >= weekAgoAll);
+        recentAll.forEach(log => {
             if (log.isCircuit && Array.isArray(log.exercises)) {
                 log.exercises.forEach(ex => {
                     const tr = document.createElement("tr");
@@ -455,36 +455,38 @@ function showCircuitBuilder(show = true) {
 }
 
 function renderCircuitExercises() {
+    // Use table body for circuit exercises
     circuitExercisesDiv.innerHTML = "";
     circuitExercises.forEach((ex, idx) => {
-        const row = document.createElement("div");
-        row.className = "circuit-exercise-row";
-        row.innerHTML = `
-            <input type="text" placeholder="Exercise" value="${ex.exercise || ""}" required title="Exercise name"/>
-            <input type="number" placeholder="Sets" value="${ex.sets || ""}" required min="1" title="Sets"/>
-            <input type="number" placeholder="Reps" value="${ex.reps || ""}" required min="1" title="Reps"/>
-            <input type="number" placeholder="Weight" value="${ex.weight || ""}" min="0" title="Weight (lbs)"/>
-            <select title="Category">
-              <option value="Strength" ${ex.category === "Strength" ? "selected" : ""}>Strength</option>
-              <option value="Cardio" ${ex.category === "Cardio" ? "selected" : ""}>Cardio</option>
-              <option value="Flexibility" ${ex.category === "Flexibility" ? "selected" : ""}>Flexibility</option>
-            </select>
-            <input type="text" placeholder="Tags" value="${ex.tags ? ex.tags.join(",") : ""}" title="Tags"/>
-            <button type="button" data-idx="${idx}" title="Remove exercise">&times;</button>
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input type="text" placeholder="Exercise" value="${ex.exercise || ""}" required title="Exercise name" style="width:110px;"/></td>
+            <td><input type="number" placeholder="Sets" value="${ex.sets || ""}" required min="1" title="Sets" style="width:55px;"/></td>
+            <td><input type="number" placeholder="Reps" value="${ex.reps || ""}" required min="1" title="Reps" style="width:55px;"/></td>
+            <td><input type="number" placeholder="Weight" value="${ex.weight || ""}" min="0" title="Weight (lbs)" style="width:70px;"/></td>
+            <td>
+                <select title="Category" style="width:100px;">
+                  <option value="Strength" ${ex.category === "Strength" ? "selected" : ""}>Strength</option>
+                  <option value="Cardio" ${ex.category === "Cardio" ? "selected" : ""}>Cardio</option>
+                  <option value="Flexibility" ${ex.category === "Flexibility" ? "selected" : ""}>Flexibility</option>
+                </select>
+            </td>
+            <td><input type="text" placeholder="Tags" value="${ex.tags ? ex.tags.join(",") : ""}" title="Tags" style="width:90px;"/></td>
+            <td><button type="button" data-idx="${idx}" title="Remove exercise" style="color:#c00; font-size:1.2em; background:none; border:none; cursor:pointer;">🗑️</button></td>
         `;
-        row.querySelector("button").onclick = () => {
+        tr.querySelector("button").onclick = () => {
             circuitExercises.splice(idx, 1);
             renderCircuitExercises();
         };
         // Update values on change
-        const inputs = row.querySelectorAll("input,select");
+        const inputs = tr.querySelectorAll("input,select");
         inputs[0].oninput = e => { ex.exercise = e.target.value; };
         inputs[1].oninput = e => { ex.sets = parseInt(e.target.value) || 1; };
         inputs[2].oninput = e => { ex.reps = parseInt(e.target.value) || 1; };
         inputs[3].oninput = e => { ex.weight = parseInt(e.target.value) || 0; };
         inputs[4].onchange = e => { ex.category = e.target.value; };
         inputs[5].oninput = e => { ex.tags = parseTags(e.target.value); };
-        circuitExercisesDiv.appendChild(row);
+        circuitExercisesDiv.appendChild(tr);
     });
 }
 
@@ -572,44 +574,240 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// --- CONNECTION TEST SCREEN ---
-// Ensure modal is hidden on load
-if (connectionTestModal) {
-    connectionTestModal.style.display = "none";
-}
+// --- SAMPLE DATA BUTTON ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Add single "Show All Samples" button to settings tab
+    const settingsTab = document.querySelector('.tab[data-tab="settings"]');
+    let sampleBtnContainer = document.getElementById("sampleButtons");
+    if (settingsTab && sampleBtnContainer) {
+        // Remove any old sample buttons
+        sampleBtnContainer.innerHTML = "";
 
-if (openConnectionTestBtn && connectionTestModal) {
-    openConnectionTestBtn.onclick = () => {
-        connectionTestModal.style.display = "flex";
-        connectionTestStatus.textContent = "Press the button to test connection to Firestore.";
-    };
-}
-if (closeConnectionTestBtn && connectionTestModal) {
-    closeConnectionTestBtn.onclick = () => {
-        connectionTestModal.style.display = "none";
-    };
-}
-// Hide modal if clicking outside the modal content
-if (connectionTestModal) {
-    connectionTestModal.addEventListener("click", (e) => {
-        if (e.target === connectionTestModal) {
-            connectionTestModal.style.display = "none";
+        // --- Show All Samples Button ---
+        if (!document.getElementById("showAllSamplesBtn")) {
+            const showAllBtn = document.createElement("button");
+            showAllBtn.id = "showAllSamplesBtn";
+            showAllBtn.type = "button";
+            showAllBtn.textContent = "Show All Samples";
+            showAllBtn.title = "Auto-fill the log form, circuit builder, chart, and table with sample/demo data";
+            showAllBtn.onclick = async () => {
+                // 1. Fill log form
+                if (form) {
+                    const today = new Date().toISOString().split("T")[0];
+                    form.date.value = today;
+                    form.exercise.value = "Bench Press";
+                    form.sets.value = 4;
+                    form.reps.value = 8;
+                    form.weight.value = 135;
+                    form.category.value = "Strength";
+                    tagsInput.value = "push,chest";
+                    // Optionally scroll to the log tab and highlight the form
+                    const logTabBtn = document.querySelector('#navbar [data-tab="log"]');
+                    if (logTabBtn) logTabBtn.click();
+                    form.classList.add("highlight");
+                    setTimeout(() => form.classList.remove("highlight"), 1200);
+                }
+
+                // 2. Fill circuit builder
+                if (circuitBuilder) {
+                    showCircuitBuilder(true);
+                    circuitExercises.length = 0;
+                    circuitExercises.push(
+                        {exercise: "Push Up", sets: 3, reps: 15, weight: 0, category: "Strength", tags: ["push", "bodyweight"]},
+                        {exercise: "Squat", sets: 3, reps: 12, weight: 0, category: "Strength", tags: ["legs", "bodyweight"]},
+                        {exercise: "Plank", sets: 3, reps: 1, weight: 0, category: "Flexibility", tags: ["core"]}
+                    );
+                    renderCircuitExercises();
+                }
+
+                // 3. Fill chart demo logs (unique dates, tag: chart)
+                const chartLogs = logs.filter(l => l.tags && l.tags.includes("chart"));
+                for (const log of chartLogs) {
+                    if (log.id) {
+                        // Remove from Firestore if possible
+                        // await deleteLog(log.id); // Uncomment if you have deleteLog implemented
+                    }
+                }
+                const today = new Date();
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - i);
+                    const log = {
+                        date: d.toISOString().split("T")[0],
+                        exercise: "Demo Chart " + (i + 1),
+                        sets: 3 + i,
+                        reps: 8,
+                        weight: 100 + i * 10,
+                        category: "Strength",
+                        tags: ["chart", "demo" + (i + 1)]
+                    };
+                    await saveLog(log);
+                }
+
+                // 4. Fill table demo logs (unique dates, tag: table, offset so no overlap)
+                const tableLogs = logs.filter(l => l.tags && l.tags.includes("table"));
+                for (const log of tableLogs) {
+                    if (log.id) {
+                        // Remove from Firestore if possible
+                        // await deleteLog(log.id); // Uncomment if you have deleteLog implemented
+                    }
+                }
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - i - 7);
+                    const log = {
+                        date: d.toISOString().split("T")[0],
+                        exercise: "Demo Table " + (i + 1),
+                        sets: 2 + i,
+                        reps: 10,
+                        weight: 80 + i * 5,
+                        category: "Cardio",
+                        tags: ["table", "demoTable" + (i + 1)]
+                    };
+                    await saveLog(log);
+                }
+
+                alert("Sample data filled: log form, circuit, chart, and table.");
+            };
+            sampleBtnContainer.appendChild(showAllBtn);
         }
-    });
-}
-if (runConnectionTestBtn && connectionTestStatus) {
-    runConnectionTestBtn.onclick = async () => {
-        connectionTestStatus.textContent = "Testing connection...";
-        try {
-            // Try to fetch a single document from logsRef
-            const snapshot = await getDocs(logsRef);
-            if (snapshot.size >= 0) {
-                connectionTestStatus.textContent = "✅ Connection successful! Firestore is reachable.";
-            } else {
-                connectionTestStatus.textContent = "⚠️ Could not verify connection.";
+    }
+});
+
+// --- DIAGNOSTICS TAB TOOLS ---
+document.addEventListener('DOMContentLoaded', () => {
+    const diagOut = document.getElementById("diagnosticsOutput");
+    const btnTestConn = document.getElementById("diagTestConnection");
+    const btnShowLS = document.getElementById("diagShowLocalStorage");
+    const btnClearLS = document.getElementById("diagClearLocalStorage");
+    const btnShowLogsCount = document.getElementById("diagShowLogsCount");
+    const btnReload = document.getElementById("diagReload");
+
+    if (btnTestConn) {
+        btnTestConn.onclick = async () => {
+            diagOut.textContent = "Testing Firestore connection...";
+            try {
+                const snapshot = await getDocs(logsRef);
+                diagOut.textContent = `✅ Firestore reachable. Log count: ${snapshot.size}`;
+            } catch (e) {
+                diagOut.textContent = "❌ Firestore connection failed: " + (e.message || e);
             }
-        } catch (err) {
-            connectionTestStatus.textContent = "❌ Connection failed: " + (err.message || err);
+        };
+    }
+    if (btnShowLS) {
+        btnShowLS.onclick = () => {
+            let out = "";
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                out += `${k}: ${localStorage.getItem(k)}\n`;
+            }
+            diagOut.textContent = out || "(Local storage is empty)";
+        };
+    }
+    if (btnClearLS) {
+        btnClearLS.onclick = () => {
+            if (confirm("Clear all local storage? This will remove saved goals and settings.")) {
+                localStorage.clear();
+                diagOut.textContent = "Local storage cleared.";
+            }
+        };
+    }
+    if (btnShowLogsCount) {
+        btnShowLogsCount.onclick = () => {
+            diagOut.textContent = `Loaded logs in memory: ${logs.length}`;
+        };
+    }
+    if (btnReload) {
+        btnReload.onclick = () => {
+            location.reload();
+        };
+    }
+});
+
+// --- Toggle summary chart/table visibility ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Toggle summary chart/table
+    const toggleBtn = document.getElementById("toggleSummaryVisuals");
+    const visualsDiv = document.getElementById("summaryVisuals");
+    if (toggleBtn && visualsDiv) {
+        let visible = false;
+        toggleBtn.onclick = () => {
+            visible = !visible;
+            visualsDiv.style.display = visible ? "" : "none";
+            toggleBtn.querySelector("span:last-child").textContent = visible ? "Hide Chart & Table" : "Show Chart & Table";
+        };
+    }
+});
+
+// --- PREFERENCES TAB LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const prefForm = document.getElementById("preferencesForm");
+    const prefTheme = document.getElementById("prefTheme");
+    const prefDefaultCategory = document.getElementById("prefDefaultCategory");
+    const prefChartType = document.getElementById("prefChartType");
+    const prefStatus = document.getElementById("preferencesStatus");
+
+    // Load preferences from localStorage
+    function loadPreferences() {
+        try {
+            return JSON.parse(localStorage.getItem("fitnessPreferences")) || {};
+        } catch {
+            return {};
         }
-    };
-}
+    }
+
+    // Save preferences to localStorage
+    function savePreferences(prefs) {
+        localStorage.setItem("fitnessPreferences", JSON.stringify(prefs));
+    }
+
+    // Apply preferences to UI
+    function applyPreferences(prefs) {
+        // Theme
+        if (prefs.theme === "dark") {
+            document.body.classList.add("dark");
+        } else if (prefs.theme === "light") {
+            document.body.classList.remove("dark");
+        } else {
+            // System default
+            document.body.classList.toggle("dark", window.matchMedia("(prefers-color-scheme: dark)").matches);
+        }
+        // Default category for log form
+        if (prefs.defaultCategory && form && form.category) {
+            form.category.value = prefs.defaultCategory;
+        }
+        // Chart type (for future use)
+        // You can use prefs.chartType in your chart rendering logic if desired
+    }
+
+    // Initialize preferences form with saved values
+    if (prefForm && prefTheme && prefDefaultCategory && prefChartType) {
+        const prefs = loadPreferences();
+        if (prefs.theme) prefTheme.value = prefs.theme;
+        if (prefs.defaultCategory) prefDefaultCategory.value = prefs.defaultCategory;
+        if (prefs.chartType) prefChartType.value = prefs.chartType;
+        applyPreferences(prefs);
+
+        prefForm.addEventListener("submit", e => {
+            e.preventDefault();
+            const newPrefs = {
+                theme: prefTheme.value,
+                defaultCategory: prefDefaultCategory.value,
+                chartType: prefChartType.value
+            };
+            savePreferences(newPrefs);
+            applyPreferences(newPrefs);
+            prefStatus.textContent = "Preferences saved!";
+            setTimeout(() => { prefStatus.textContent = ""; }, 1500);
+        });
+
+        // Apply theme immediately on change
+        prefTheme.addEventListener("change", () => {
+            applyPreferences({
+                theme: prefTheme.value,
+                defaultCategory: prefDefaultCategory.value,
+                chartType: prefChartType.value
+            });
+        });
+    }
+});
