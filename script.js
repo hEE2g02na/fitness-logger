@@ -105,9 +105,11 @@ function loadGoals() {
         return {};
     }
 }
+
 function saveGoals(goals) {
     localStorage.setItem("fitnessGoals", JSON.stringify(goals));
 }
+
 if (goalForm) {
     ["goalVolume", "goalSets", "goalSessions", "goalWeeklyVolume"].forEach(id => {
         if (goals[id]) goalForm[id].value = goals[id];
@@ -124,6 +126,7 @@ if (goalForm) {
         showGoalStatus();
     });
 }
+
 function showGoalStatus() {
     if (!goalStatus) return;
     const today = new Date().toISOString().split("T")[0];
@@ -180,13 +183,15 @@ function getStreak(logs, type = "day") {
     }
     return streak;
 }
+
 function getWeekNumber(d) {
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
+
 function updateStreakTracker() {
     if (!streakTracker) return;
     const uniqueDays = [...new Set(logs.map(l => l.date))];
@@ -223,6 +228,7 @@ function updateExerciseSuggestions() {
         `<option value="${ex}"></option>`
     ).join("");
 }
+
 if (exerciseInput) {
     exerciseInput.addEventListener("input", () => {
         updateExerciseSuggestions();
@@ -233,12 +239,14 @@ if (exerciseInput) {
 function parseTags(str) {
     return str.split(",").map(t => t.trim().toLowerCase()).filter(Boolean);
 }
+
 function tagsToString(tags) {
     return (tags || []).join(", ");
 }
 
 // --- CHART (Main Bar Chart) ---
 let mainChartInstance = null;
+
 function drawMainChart(logs) {
     if (!chartCanvas) return;
     const ctx = chartCanvas.getContext("2d");
@@ -323,12 +331,12 @@ function renderLogs() {
             html = `<div><strong>${log.date}</strong>: <b>Circuit</b> 
                 <ul style="margin:0.5em 0 0 1em;padding:0;">
                   ${log.exercises.map(ex =>
-                    `<li style="background:none;box-shadow:none;padding:0;margin:0 0 0.2em 0;">
+                `<li style="background:none;box-shadow:none;padding:0;margin:0 0 0.2em 0;">
                       ${ex.exercise} (${ex.category}) 
                       ${ex.sets}x${ex.reps} @ ${ex.weight}lbs 
                       ${ex.tags && ex.tags.length ? `<span style="font-size:0.9em;color:#888;">[${tagsToString(ex.tags)}]</span>` : ""}
                     </li>`
-                  ).join("")}
+            ).join("")}
                 </ul>
               </div>`;
         } else {
@@ -411,14 +419,21 @@ function drawChart(data) {
             datasets: [{
                 label: "Volume Lifted",
                 data: data.map(log => log.sets * log.reps * log.weight),
-                backgroundColor: "#4CAF50"
+                backgroundColor: window._userChartColor || "#4CAF50"
             }]
         },
         options: {
             responsive: true,
+            animation: window._chartAnimation !== false,
             scales: {
-                x: {title: {display: true, text: "Date"}},
-                y: {title: {display: true, text: "Total Volume (lbs)"}}
+                x: {
+                    title: {display: true, text: "Date"},
+                    grid: {display: window._showChartGridlines !== false}
+                },
+                y: {
+                    title: {display: true, text: "Total Volume (lbs)"},
+                    grid: {display: window._showChartGridlines !== false}
+                }
             }
         }
     });
@@ -480,12 +495,24 @@ function renderCircuitExercises() {
         };
         // Update values on change
         const inputs = tr.querySelectorAll("input,select");
-        inputs[0].oninput = e => { ex.exercise = e.target.value; };
-        inputs[1].oninput = e => { ex.sets = parseInt(e.target.value) || 1; };
-        inputs[2].oninput = e => { ex.reps = parseInt(e.target.value) || 1; };
-        inputs[3].oninput = e => { ex.weight = parseInt(e.target.value) || 0; };
-        inputs[4].onchange = e => { ex.category = e.target.value; };
-        inputs[5].oninput = e => { ex.tags = parseTags(e.target.value); };
+        inputs[0].oninput = e => {
+            ex.exercise = e.target.value;
+        };
+        inputs[1].oninput = e => {
+            ex.sets = parseInt(e.target.value) || 1;
+        };
+        inputs[2].oninput = e => {
+            ex.reps = parseInt(e.target.value) || 1;
+        };
+        inputs[3].oninput = e => {
+            ex.weight = parseInt(e.target.value) || 0;
+        };
+        inputs[4].onchange = e => {
+            ex.category = e.target.value;
+        };
+        inputs[5].oninput = e => {
+            ex.tags = parseTags(e.target.value);
+        };
         circuitExercisesDiv.appendChild(tr);
     });
 }
@@ -553,135 +580,157 @@ async function saveLog(log) {
 }
 
 // --- TAB SYSTEM: Click & Keyboard Navigation, Accessibility ---
-
-// Remove one of the tab switcher implementations to avoid duplicate event handlers
-// Keep only the simple DOMContentLoaded handler for tab switching:
-document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('#navbar [data-tab]');
+function initTabSwitcher() {
+    const nav = document.getElementById('navbar');
+    if (!nav) {
+        console.warn('Navbar element with id="navbar" not found.');
+        return;
+    }
+    const tabButtons = nav.querySelectorAll('button[data-tab]');
     const tabs = document.querySelectorAll('.tab');
 
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
+    nav.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-tab]');
+        if (btn) {
             const tabName = btn.getAttribute('data-tab');
-            // Show the selected tab, hide others
-            tabs.forEach(tab => {
-                tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
-            });
-            // Update aria-current for accessibility
-            buttons.forEach(b => b.removeAttribute('aria-current'));
+            // Remove active/aria-current from all
+            tabButtons.forEach(b => b.removeAttribute('aria-current'));
+            tabs.forEach(tab => tab.classList.remove('active'));
+            // Set active/aria-current on selected
             btn.setAttribute('aria-current', 'page');
-        });
-    });
-});
-
-// --- SAMPLE DATA BUTTON ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Add single "Show All Samples" button to settings tab
-    const settingsTab = document.querySelector('.tab[data-tab="settings"]');
-    let sampleBtnContainer = document.getElementById("sampleButtons");
-    if (settingsTab && sampleBtnContainer) {
-        // Remove any old sample buttons
-        sampleBtnContainer.innerHTML = "";
-
-        // --- Show All Samples Button ---
-        if (!document.getElementById("showAllSamplesBtn")) {
-            const showAllBtn = document.createElement("button");
-            showAllBtn.id = "showAllSamplesBtn";
-            showAllBtn.type = "button";
-            showAllBtn.textContent = "Show All Samples";
-            showAllBtn.title = "Auto-fill the log form, circuit builder, chart, and table with sample/demo data";
-            showAllBtn.onclick = async () => {
-                // 1. Fill log form
-                if (form) {
-                    const today = new Date().toISOString().split("T")[0];
-                    form.date.value = today;
-                    form.exercise.value = "Bench Press";
-                    form.sets.value = 4;
-                    form.reps.value = 8;
-                    form.weight.value = 135;
-                    form.category.value = "Strength";
-                    tagsInput.value = "push,chest";
-                    // Optionally scroll to the log tab and highlight the form
-                    const logTabBtn = document.querySelector('#navbar [data-tab="log"]');
-                    if (logTabBtn) logTabBtn.click();
-                    form.classList.add("highlight");
-                    setTimeout(() => form.classList.remove("highlight"), 1200);
-                }
-
-                // 2. Fill circuit builder
-                if (circuitBuilder) {
-                    showCircuitBuilder(true);
-                    circuitExercises.length = 0;
-                    circuitExercises.push(
-                        {exercise: "Push Up", sets: 3, reps: 15, weight: 0, category: "Strength", tags: ["push", "bodyweight"]},
-                        {exercise: "Squat", sets: 3, reps: 12, weight: 0, category: "Strength", tags: ["legs", "bodyweight"]},
-                        {exercise: "Plank", sets: 3, reps: 1, weight: 0, category: "Flexibility", tags: ["core"]}
-                    );
-                    renderCircuitExercises();
-                }
-
-                // 3. Fill chart demo logs (unique dates, tag: chart)
-                const chartLogs = logs.filter(l => l.tags && l.tags.includes("chart"));
-                for (const log of chartLogs) {
-                    if (log.id) {
-                        // Remove from Firestore if possible
-                        // await deleteLog(log.id); // Uncomment if you have deleteLog implemented
-                    }
-                }
-                const today = new Date();
-                for (let i = 0; i < 7; i++) {
-                    const d = new Date(today);
-                    d.setDate(today.getDate() - i);
-                    const log = {
-                        date: d.toISOString().split("T")[0],
-                        exercise: "Demo Chart " + (i + 1),
-                        sets: 3 + i,
-                        reps: 8,
-                        weight: 100 + i * 10,
-                        category: "Strength",
-                        tags: ["chart", "demo" + (i + 1)]
-                    };
-                    await saveLog(log);
-                }
-
-                // 4. Fill table demo logs (unique dates, tag: table, offset so no overlap)
-                const tableLogs = logs.filter(l => l.tags && l.tags.includes("table"));
-                for (const log of tableLogs) {
-                    if (log.id) {
-                        // Remove from Firestore if possible
-                        // await deleteLog(log.id); // Uncomment if you have deleteLog implemented
-                    }
-                }
-                for (let i = 0; i < 7; i++) {
-                    const d = new Date(today);
-                    d.setDate(today.getDate() - i - 7);
-                    const log = {
-                        date: d.toISOString().split("T")[0],
-                        exercise: "Demo Table " + (i + 1),
-                        sets: 2 + i,
-                        reps: 10,
-                        weight: 80 + i * 5,
-                        category: "Cardio",
-                        tags: ["table", "demoTable" + (i + 1)]
-                    };
-                    await saveLog(log);
-                }
-
-                alert("Sample data filled: log form, circuit, chart, and table.");
-            };
-            sampleBtnContainer.appendChild(showAllBtn);
+            const activeTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+            if (activeTab) activeTab.classList.add('active');
         }
-    }
-});
+    });
+}
 
-// --- DIAGNOSTICS TAB TOOLS ---
 document.addEventListener('DOMContentLoaded', () => {
+    initTabSwitcher();
+    // --- SAMPLE DATA BUTTON ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Add single "Show All Samples" button to settings tab
+        const settingsTab = document.querySelector('.tab[data-tab="settings"]');
+        let sampleBtnContainer = document.getElementById("sampleButtons");
+        if (settingsTab && sampleBtnContainer) {
+            // Remove any old sample buttons
+            sampleBtnContainer.innerHTML = "";
+
+            // --- Show All Samples Button ---
+            if (!document.getElementById("showAllSamplesBtn")) {
+                const showAllBtn = document.createElement("button");
+                showAllBtn.id = "showAllSamplesBtn";
+                showAllBtn.type = "button";
+                showAllBtn.textContent = "Show All Samples";
+                showAllBtn.title = "Auto-fill the log form, circuit builder, chart, and table with sample/demo data";
+                showAllBtn.onclick = async () => {
+                    // 1. Fill log form
+                    if (form) {
+                        const today = new Date().toISOString().split("T")[0];
+                        form.date.value = today;
+                        form.exercise.value = "Bench Press";
+                        form.sets.value = 4;
+                        form.reps.value = 8;
+                        form.weight.value = 135;
+                        form.category.value = "Strength";
+                        tagsInput.value = "push,chest";
+                        // Optionally scroll to the log tab and highlight the form
+                        const logTabBtn = document.querySelector('#navbar [data-tab="log"]');
+                        if (logTabBtn) logTabBtn.click();
+                        form.classList.add("highlight");
+                        setTimeout(() => form.classList.remove("highlight"), 1200);
+                    }
+
+                    // 2. Fill circuit builder
+                    if (circuitBuilder) {
+                        showCircuitBuilder(true);
+                        circuitExercises.length = 0;
+                        circuitExercises.push(
+                            {
+                                exercise: "Push Up",
+                                sets: 3,
+                                reps: 15,
+                                weight: 0,
+                                category: "Strength",
+                                tags: ["push", "bodyweight"]
+                            },
+                            {
+                                exercise: "Squat",
+                                sets: 3,
+                                reps: 12,
+                                weight: 0,
+                                category: "Strength",
+                                tags: ["legs", "bodyweight"]
+                            },
+                            {exercise: "Plank", sets: 3, reps: 1, weight: 0, category: "Flexibility", tags: ["core"]}
+                        );
+                        renderCircuitExercises();
+                    }
+
+                    // 3. Fill chart demo logs (unique dates, tag: chart)
+                    const chartLogs = logs.filter(l => l.tags && l.tags.includes("chart"));
+                    for (const log of chartLogs) {
+                        if (log.id) {
+                            // Remove from Firestore if possible
+                            // await deleteLog(log.id); // Uncomment if you have deleteLog implemented
+                        }
+                    }
+                    const today = new Date();
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date(today);
+                        d.setDate(today.getDate() - i);
+                        const log = {
+                            date: d.toISOString().split("T")[0],
+                            exercise: "Demo Chart " + (i + 1),
+                            sets: 3 + i,
+                            reps: 8,
+                            weight: 100 + i * 10,
+                            category: "Strength",
+                            tags: ["chart", "demo" + (i + 1)]
+                        };
+                        await saveLog(log);
+                    }
+
+                    // 4. Fill table demo logs (unique dates, tag: table, offset so no overlap)
+                    const tableLogs = logs.filter(l => l.tags && l.tags.includes("table"));
+                    for (const log of tableLogs) {
+                        if (log.id) {
+                            // Remove from Firestore if possible
+                            // await deleteLog(log.id); // Uncomment if you have deleteLog implemented
+                        }
+                    }
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date(today);
+                        d.setDate(today.getDate() - i - 7);
+                        const log = {
+                            date: d.toISOString().split("T")[0],
+                            exercise: "Demo Table " + (i + 1),
+                            sets: 2 + i,
+                            reps: 10,
+                            weight: 80 + i * 5,
+                            category: "Cardio",
+                            tags: ["table", "demoTable" + (i + 1)]
+                        };
+                        await saveLog(log);
+                    }
+
+                    alert("Sample data filled: log form, circuit, chart, and table.");
+                };
+                sampleBtnContainer.appendChild(showAllBtn);
+            }
+        }
+    });
+
+    // --- DIAGNOSTICS TAB TOOLS ---
     const diagOut = document.getElementById("diagnosticsOutput");
     const btnTestConn = document.getElementById("diagTestConnection");
     const btnShowLS = document.getElementById("diagShowLocalStorage");
     const btnClearLS = document.getElementById("diagClearLocalStorage");
     const btnShowLogsCount = document.getElementById("diagShowLogsCount");
     const btnReload = document.getElementById("diagReload");
+    // New tool buttons
+    const btnShowUserAgent = document.getElementById("diagShowUserAgent");
+    const btnShowScreenSize = document.getElementById("diagShowScreenSize");
+    const btnShowAppVersion = document.getElementById("diagShowAppVersion");
 
     if (btnTestConn) {
         btnTestConn.onclick = async () => {
@@ -722,92 +771,324 @@ document.addEventListener('DOMContentLoaded', () => {
             location.reload();
         };
     }
-});
-
-// --- Toggle summary chart/table visibility ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Toggle summary chart/table
-    const toggleBtn = document.getElementById("toggleSummaryVisuals");
-    const visualsDiv = document.getElementById("summaryVisuals");
-    if (toggleBtn && visualsDiv) {
-        let visible = false;
-        toggleBtn.onclick = () => {
-            visible = !visible;
-            visualsDiv.style.display = visible ? "" : "none";
-            toggleBtn.querySelector("span:last-child").textContent = visible ? "Hide Chart & Table" : "Show Chart & Table";
+    if (btnShowUserAgent) {
+        btnShowUserAgent.onclick = () => {
+            diagOut.textContent = `User Agent:\n${navigator.userAgent}`;
         };
     }
-});
-
-// --- PREFERENCES TAB LOGIC ---
-document.addEventListener('DOMContentLoaded', () => {
-    const prefForm = document.getElementById("preferencesForm");
-    const prefTheme = document.getElementById("prefTheme");
-    const prefDefaultCategory = document.getElementById("prefDefaultCategory");
-    const prefChartType = document.getElementById("prefChartType");
-    const prefStatus = document.getElementById("preferencesStatus");
-
-    // Load preferences from localStorage
-    function loadPreferences() {
-        try {
-            return JSON.parse(localStorage.getItem("fitnessPreferences")) || {};
-        } catch {
-            return {};
-        }
+    if (btnShowScreenSize) {
+        btnShowScreenSize.onclick = () => {
+            diagOut.textContent = `Screen Size:\n${window.innerWidth} x ${window.innerHeight} px`;
+        };
+    }
+    if (btnShowAppVersion) {
+        btnShowAppVersion.onclick = () => {
+            diagOut.textContent = `App Version:\nFitness Logger v1.0.0`;
+        };
     }
 
-    // Save preferences to localStorage
-    function savePreferences(prefs) {
-        localStorage.setItem("fitnessPreferences", JSON.stringify(prefs));
-    }
-
-    // Apply preferences to UI
-    function applyPreferences(prefs) {
-        // Theme
-        if (prefs.theme === "dark") {
-            document.body.classList.add("dark");
-        } else if (prefs.theme === "light") {
-            document.body.classList.remove("dark");
-        } else {
-            // System default
-            document.body.classList.toggle("dark", window.matchMedia("(prefers-color-scheme: dark)").matches);
-        }
-        // Default category for log form
-        if (prefs.defaultCategory && form && form.category) {
-            form.category.value = prefs.defaultCategory;
-        }
-        // Chart type (for future use)
-        // You can use prefs.chartType in your chart rendering logic if desired
-    }
-
-    // Initialize preferences form with saved values
-    if (prefForm && prefTheme && prefDefaultCategory && prefChartType) {
-        const prefs = loadPreferences();
-        if (prefs.theme) prefTheme.value = prefs.theme;
-        if (prefs.defaultCategory) prefDefaultCategory.value = prefs.defaultCategory;
-        if (prefs.chartType) prefChartType.value = prefs.chartType;
-        applyPreferences(prefs);
-
-        prefForm.addEventListener("submit", e => {
-            e.preventDefault();
-            const newPrefs = {
-                theme: prefTheme.value,
-                defaultCategory: prefDefaultCategory.value,
-                chartType: prefChartType.value
+    // --- Toggle summary chart/table visibility ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Toggle summary chart/table
+        const toggleBtn = document.getElementById("toggleSummaryVisuals");
+        const visualsDiv = document.getElementById("summaryVisuals");
+        if (toggleBtn && visualsDiv) {
+            let visible = false;
+            toggleBtn.onclick = () => {
+                visible = !visible;
+                visualsDiv.style.display = visible ? "" : "none";
+                toggleBtn.querySelector("span:last-child").textContent = visible ? "Hide Chart & Table" : "Show Chart & Table";
             };
-            savePreferences(newPrefs);
-            applyPreferences(newPrefs);
-            prefStatus.textContent = "Preferences saved!";
-            setTimeout(() => { prefStatus.textContent = ""; }, 1500);
-        });
+        }
+    });
 
-        // Apply theme immediately on change
-        prefTheme.addEventListener("change", () => {
-            applyPreferences({
-                theme: prefTheme.value,
-                defaultCategory: prefDefaultCategory.value,
-                chartType: prefChartType.value
+    // --- PREFERENCES TAB LOGIC ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const prefForm = document.getElementById("preferencesForm");
+        const prefTheme = document.getElementById("prefTheme");
+        const prefFontSize = document.getElementById("prefFontSize");
+        const prefPrimaryColor = document.getElementById("prefPrimaryColor");
+        const prefChartColor = document.getElementById("prefChartColor");
+        const prefRounded = document.getElementById("prefRounded");
+        const prefCompact = document.getElementById("prefCompact");
+        const prefDefaultCategory = document.getElementById("prefDefaultCategory");
+        const prefChartType = document.getElementById("prefChartType");
+        const prefStatus = document.getElementById("preferencesStatus");
+
+        // --- New customization controls ---
+        const prefFontFamily = document.getElementById("prefFontFamily"); // e.g. select
+        const prefShowGridlines = document.getElementById("prefShowGridlines"); // e.g. checkbox
+        const prefChartAnimation = document.getElementById("prefChartAnimation"); // e.g. checkbox
+        const prefSidebarPosition = document.getElementById("prefSidebarPosition"); // e.g. select
+        const prefAccentColor = document.getElementById("prefAccentColor"); // e.g. color input
+
+        // --- New appearance controls ---
+        const prefBorderRadius = document.getElementById("prefBorderRadius");
+        const borderRadiusValue = document.getElementById("borderRadiusValue");
+        const prefShadow = document.getElementById("prefShadow");
+        const shadowValue = document.getElementById("shadowValue");
+        const prefTransition = document.getElementById("prefTransition");
+        const transitionValue = document.getElementById("transitionValue");
+
+        // Show live value for sliders
+        if (prefBorderRadius && borderRadiusValue) {
+            prefBorderRadius.addEventListener("input", () => {
+                borderRadiusValue.textContent = prefBorderRadius.value + "px";
+            });
+        }
+        if (prefShadow && shadowValue) {
+            prefShadow.addEventListener("input", () => {
+                shadowValue.textContent = prefShadow.value + "px";
+            });
+        }
+        if (prefTransition && transitionValue) {
+            prefTransition.addEventListener("input", () => {
+                transitionValue.textContent = prefTransition.value + "s";
+            });
+        }
+
+        // Load preferences from localStorage
+        function loadPreferences() {
+            try {
+                return JSON.parse(localStorage.getItem("fitnessPreferences")) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        // Save preferences to localStorage
+        function savePreferences(prefs) {
+            localStorage.setItem("fitnessPreferences", JSON.stringify(prefs));
+        }
+
+        // Apply preferences to UI
+        function applyPreferences(prefs) {
+            // Theme
+            if (prefs.theme === "dark") {
+                document.body.classList.add("dark");
+            } else if (prefs.theme === "light") {
+                document.body.classList.remove("dark");
+            } else {
+                document.body.classList.toggle("dark", window.matchMedia("(prefers-color-scheme: dark)").matches);
+            }
+            // Font size
+            document.body.style.fontSize =
+                prefs.fontSize === "large" ? "1.2em" :
+                    prefs.fontSize === "xlarge" ? "1.4em" : "";
+            // Primary color
+            document.documentElement.style.setProperty('--primary-color', prefs.primaryColor || "#4CAF50");
+            // Chart color (used in drawChart/drawMainChart)
+            window._userChartColor = prefs.chartColor || "#4CAF50";
+            // Rounded corners
+            if (prefs.rounded) {
+                document.body.classList.add("rounded");
+            } else {
+                document.body.classList.remove("rounded");
+            }
+            // Compact layout
+            if (prefs.compact) {
+                document.body.classList.add("compact");
+            } else {
+                document.body.classList.remove("compact");
+            }
+            // Default category for log form
+            if (prefs.defaultCategory && form && form.category) {
+                form.category.value = prefs.defaultCategory;
+            }
+            // Chart type (for future use)
+            // You can use prefs.chartType in your chart rendering logic if desired
+
+            // --- New preferences ---
+            // Font family
+            if (prefs.fontFamily) {
+                document.body.style.fontFamily = prefs.fontFamily;
+            } else {
+                document.body.style.fontFamily = "";
+            }
+            // Chart gridlines
+            window._showChartGridlines = prefs.showGridlines !== false; // default true
+            // Chart animation
+            window._chartAnimation = prefs.chartAnimation !== false; // default true
+            // Sidebar position
+            if (prefs.sidebarPosition === "right") {
+                document.body.classList.add("sidebar-right");
+                document.body.classList.remove("sidebar-left");
+            } else {
+                document.body.classList.add("sidebar-left");
+                document.body.classList.remove("sidebar-right");
+            }
+            // Accent color
+            if (prefs.accentColor) {
+                document.documentElement.style.setProperty('--accent-color', prefs.accentColor);
+            }
+            // Border radius
+            if (typeof prefs.borderRadius !== "undefined") {
+                document.documentElement.style.setProperty('--border-radius', prefs.borderRadius + "px");
+            }
+            // Shadow
+            if (typeof prefs.shadow !== "undefined") {
+                document.documentElement.style.setProperty('--shadow', `0 2px ${prefs.shadow}px rgba(0,0,0,0.1)`);
+            }
+            // Transition
+            if (typeof prefs.transition !== "undefined") {
+                document.documentElement.style.setProperty('--transition', `all ${prefs.transition}s ease-in-out`);
+            }
+        }
+
+        // Initialize preferences form with saved values
+        if (prefForm && prefTheme && prefFontSize && prefPrimaryColor && prefChartColor && prefRounded && prefCompact && prefDefaultCategory && prefChartType) {
+            const prefs = loadPreferences();
+            if (prefs.theme) prefTheme.value = prefs.theme;
+            if (prefs.fontSize) prefFontSize.value = prefs.fontSize;
+            if (prefs.primaryColor) prefPrimaryColor.value = prefs.primaryColor;
+            if (prefs.chartColor) prefChartColor.value = prefs.chartColor;
+            if (prefs.rounded) prefRounded.checked = !!prefs.rounded;
+            if (prefs.compact) prefCompact.checked = !!prefs.compact;
+            if (prefs.defaultCategory) prefDefaultCategory.value = prefs.defaultCategory;
+            if (prefs.chartType) prefChartType.value = prefs.chartType;
+
+            // --- New preferences ---
+            if (prefFontFamily && prefs.fontFamily) prefFontFamily.value = prefs.fontFamily;
+            if (prefShowGridlines) prefShowGridlines.checked = prefs.showGridlines !== false;
+            if (prefChartAnimation) prefChartAnimation.checked = prefs.chartAnimation !== false;
+            if (prefSidebarPosition && prefs.sidebarPosition) prefSidebarPosition.value = prefs.sidebarPosition;
+            if (prefAccentColor && prefs.accentColor) prefAccentColor.value = prefs.accentColor;
+            if (prefBorderRadius && typeof prefs.borderRadius !== "undefined") {
+                prefBorderRadius.value = prefs.borderRadius;
+                if (borderRadiusValue) borderRadiusValue.textContent = prefs.borderRadius + "px";
+            }
+            if (prefShadow && typeof prefs.shadow !== "undefined") {
+                prefShadow.value = prefs.shadow;
+                if (shadowValue) shadowValue.textContent = prefs.shadow + "px";
+            }
+            if (prefTransition && typeof prefs.transition !== "undefined") {
+                prefTransition.value = prefs.transition;
+                if (transitionValue) transitionValue.textContent = prefs.transition + "s";
+            }
+
+            applyPreferences(prefs);
+
+            prefForm.addEventListener("submit", e => {
+                e.preventDefault();
+                const newPrefs = {
+                    theme: prefTheme.value,
+                    fontSize: prefFontSize.value,
+                    primaryColor: prefPrimaryColor.value,
+                    chartColor: prefChartColor.value,
+                    rounded: prefRounded.checked,
+                    compact: prefCompact.checked,
+                    defaultCategory: prefDefaultCategory.value,
+                    chartType: prefChartType.value,
+                    // --- New preferences ---
+                    fontFamily: prefFontFamily ? prefFontFamily.value : "",
+                    showGridlines: prefShowGridlines ? prefShowGridlines.checked : true,
+                    chartAnimation: prefChartAnimation ? prefChartAnimation.checked : true,
+                    sidebarPosition: prefSidebarPosition ? prefSidebarPosition.value : "left",
+                    accentColor: prefAccentColor ? prefAccentColor.value : "",
+                    borderRadius: prefBorderRadius ? parseInt(prefBorderRadius.value) : 8,
+                    shadow: prefShadow ? parseInt(prefShadow.value) : 8,
+                    transition: prefTransition ? parseFloat(prefTransition.value) : 0.25
+                };
+                savePreferences(newPrefs);
+                applyPreferences(newPrefs);
+                prefStatus.textContent = "Appearance saved!";
+                setTimeout(() => {
+                    prefStatus.textContent = "";
+                }, 1500);
+            });
+
+            // Apply theme and appearance immediately on change
+            [
+                prefTheme, prefFontSize, prefPrimaryColor, prefChartColor, prefRounded, prefCompact,
+                prefFontFamily, prefShowGridlines, prefChartAnimation, prefSidebarPosition, prefAccentColor,
+                prefBorderRadius, prefShadow, prefTransition
+            ].forEach(el => {
+                if (el) {
+                    el.addEventListener("change", () => {
+                        applyPreferences({
+                            theme: prefTheme.value,
+                            fontSize: prefFontSize.value,
+                            primaryColor: prefPrimaryColor.value,
+                            chartColor: prefChartColor.value,
+                            rounded: prefRounded.checked,
+                            compact: prefCompact.checked,
+                            defaultCategory: prefDefaultCategory.value,
+                            chartType: prefChartType.value,
+                            fontFamily: prefFontFamily ? prefFontFamily.value : "",
+                            showGridlines: prefShowGridlines ? prefShowGridlines.checked : true,
+                            chartAnimation: prefChartAnimation ? prefChartAnimation.checked : true,
+                            sidebarPosition: prefSidebarPosition ? prefSidebarPosition.value : "left",
+                            accentColor: prefAccentColor ? prefAccentColor.value : "",
+                            borderRadius: prefBorderRadius ? parseInt(prefBorderRadius.value) : 8,
+                            shadow: prefShadow ? parseInt(prefShadow.value) : 8,
+                            transition: prefTransition ? parseFloat(prefTransition.value) : 0.25
+                        });
+                    });
+                }
+            });
+        }
+    });
+
+    // --- Update chart rendering to use new preferences ---
+    function drawChart(data) {
+        const ctx = chartCanvas.getContext("2d");
+        if (window.chartInstance) window.chartInstance.destroy();
+        window.chartInstance = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: data.map(log => log.date),
+                datasets: [{
+                    label: "Volume Lifted",
+                    data: data.map(log => log.sets * log.reps * log.weight),
+                    backgroundColor: window._userChartColor || "#4CAF50"
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: window._chartAnimation !== false,
+                scales: {
+                    x: {
+                        title: {display: true, text: "Date"},
+                        grid: {display: window._showChartGridlines !== false}
+                    },
+                    y: {
+                        title: {display: true, text: "Total Volume (lbs)"},
+                        grid: {display: window._showChartGridlines !== false}
+                    }
+                }
+            }
+        });
+    }
+
+    // Test script for tab switcher (call manually if needed)
+    function testTabSwitcher() {
+        const tabButtons = document.querySelectorAll('button[data-tab]');
+        const tabs = document.querySelectorAll('.tab');
+
+        tabButtons.forEach((button) => {
+            const tabName = button.getAttribute('data-tab');
+            button.click();
+            console.assert(
+                button.getAttribute('aria-current') === 'page',
+                `Failed: Button for tab "${tabName}" should have aria-current="page".`
+            );
+            const activeTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+            console.assert(
+                activeTab.classList.contains('active'),
+                `Failed: Tab "${tabName}" should be active.`
+            );
+            tabs.forEach((tab) => {
+                if (tab !== activeTab) {
+                    console.assert(
+                        !tab.classList.contains('active'),
+                        `Failed: Tab "${tab.getAttribute('data-tab')}" should not be active.`
+                    );
+                }
             });
         });
+
+        console.log('Tab switcher tests completed.');
     }
+
+    // To run the test, call testTabSwitcher() from the browser console if needed.
 });

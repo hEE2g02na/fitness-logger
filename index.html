@@ -19,7 +19,7 @@
 </head>
 <body class="has-bottomnav">
 <div id="syncStatus" title="Shows your sync/connection status">
-    <progress id="syncProgressBar" value="0" max="100" style="width:120px;vertical-align:middle;"></progress>
+    <progress id="syncProgressBar" max="100" style="width:120px;vertical-align:middle;" value="0"></progress>
     <span id="syncStatusLabel">🔄 Syncing...</span>
 </div>
 <h1>Fitness Logger</h1>
@@ -47,9 +47,9 @@
             <span class="nav-icon">🛠️</span>
             <span class="nav-label">Diagnostics</span>
         </button>
-        <button aria-label="Preferences" data-tab="preferences" title="Go to Preferences tab">
-            <span class="nav-icon">⚙️</span>
-            <span class="nav-label">Preferences</span>
+        <button aria-label="Appearance" data-tab="preferences" title="Go to Appearance tab">
+            <span class="nav-icon">🎨</span>
+            <span class="nav-label">Appearance</span>
         </button>
     </nav>
 </div>
@@ -58,7 +58,8 @@
 <div class="tab active" data-tab="log">
     <form id="entryForm">
         <input id="date" required title="Date of workout" type="date"/>
-        <input autocomplete="off" id="exercise" list="exerciseSuggestions" placeholder="Exercise" required title="Type exercise name"
+        <input autocomplete="off" id="exercise" list="exerciseSuggestions" placeholder="Exercise" required
+               title="Type exercise name"
                type="text"/>
         <datalist id="exerciseSuggestions"></datalist>
         <input id="sets" placeholder="Sets" required title="Number of sets" type="number"/>
@@ -76,33 +77,38 @@
     </form>
 
     <!-- Circuit Builder Section -->
-    <section id="circuitBuilder" style="display:none; margin-top:1rem; background:#f8f8f8; border:1px solid #ddd; border-radius:8px; padding:1em 1.5em;">
+    <section id="circuitBuilder"
+             style="display:none; margin-top:1rem; background:#f8f8f8; border:1px solid #ddd; border-radius:8px; padding:1em 1.5em;">
         <h4 style="margin-top:0;">Add Circuit</h4>
         <div style="color:#666; font-size:0.98em; margin-bottom:0.7em;">
-            Build a circuit by adding multiple exercises. Fill out each row, then save the circuit as a single workout entry.
+            Build a circuit by adding multiple exercises. Fill out each row, then save the circuit as a single workout
+            entry.
         </div>
         <div style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; margin-bottom:0.5em;">
                 <thead>
-                    <tr style="background:#eee;">
-                        <th style="padding:0.3em 0.5em;">Exercise</th>
-                        <th style="padding:0.3em 0.5em;">Sets</th>
-                        <th style="padding:0.3em 0.5em;">Reps</th>
-                        <th style="padding:0.3em 0.5em;">Weight</th>
-                        <th style="padding:0.3em 0.5em;">Category</th>
-                        <th style="padding:0.3em 0.5em;">Tags</th>
-                        <th style="padding:0.3em 0.5em;">Remove</th>
-                    </tr>
+                <tr style="background:#eee;">
+                    <th style="padding:0.3em 0.5em;">Exercise</th>
+                    <th style="padding:0.3em 0.5em;">Sets</th>
+                    <th style="padding:0.3em 0.5em;">Reps</th>
+                    <th style="padding:0.3em 0.5em;">Weight</th>
+                    <th style="padding:0.3em 0.5em;">Category</th>
+                    <th style="padding:0.3em 0.5em;">Tags</th>
+                    <th style="padding:0.3em 0.5em;">Remove</th>
+                </tr>
                 </thead>
                 <tbody id="circuitExercises">
-                    <!-- JS will fill rows here -->
+                <!-- JS will fill rows here -->
                 </tbody>
             </table>
         </div>
         <div style="display:flex; gap:0.5em; flex-wrap:wrap;">
-            <button id="addExerciseToCircuitBtn" title="Add exercise to circuit" type="button">Add Exercise to Circuit</button>
-            <button id="saveCircuitBtn" title="Save circuit" type="button" style="background:#4CAF50; color:#fff;">Save Circuit</button>
-            <button id="cancelCircuitBtn" title="Cancel circuit" type="button" style="background:#eee;">Cancel</button>
+            <button id="addExerciseToCircuitBtn" title="Add exercise to circuit" type="button">Add Exercise to Circuit
+            </button>
+            <button id="saveCircuitBtn" style="background:#4CAF50; color:#fff;" title="Save circuit" type="button">Save
+                Circuit
+            </button>
+            <button id="cancelCircuitBtn" style="background:#eee;" title="Cancel circuit" type="button">Cancel</button>
         </div>
     </section>
 
@@ -129,17 +135,17 @@
     <canvas data-chart="chart" height="200" id="chart" title="Bar chart of recent workouts" width="400"></canvas>
     <table id="summaryTable" style="margin-top:1em; width:100%; border-collapse:collapse;">
         <thead>
-            <tr>
-                <th>Date</th>
-                <th>Exercise</th>
-                <th>Sets</th>
-                <th>Reps</th>
-                <th>Weight</th>
-                <th>Volume</th>
-            </tr>
+        <tr>
+            <th>Date</th>
+            <th>Exercise</th>
+            <th>Sets</th>
+            <th>Reps</th>
+            <th>Weight</th>
+            <th>Volume</th>
+        </tr>
         </thead>
         <tbody>
-            <!-- Filled by JS -->
+        <!-- Filled by JS -->
         </tbody>
     </table>
 </div>
@@ -210,38 +216,134 @@
         <button id="diagClearLocalStorage">Clear Local Storage</button>
         <button id="diagShowLogsCount">Show Log Count</button>
         <button id="diagReload">Reload App</button>
-        <div id="diagnosticsOutput" style="margin-top:1em; white-space:pre-wrap; background:#f8f8f8; border:1px solid #ccc; border-radius:6px; padding:1em;"></div>
+        <!-- New tools -->
+        <button id="diagShowUserAgent">Show User Agent</button>
+        <button id="diagShowScreenSize">Show Screen Size</button>
+        <button id="diagShowAppVersion">Show App Version</button>
     </div>
+    <div id="diagnosticsOutput"
+         style="margin-top:1em; white-space:pre-wrap; background:#f8f8f8; border:1px solid #ccc; border-radius:6px; padding:1em; min-height:3em;"></div>
 </div>
 
 <!-- ⚙️ PREFERENCES TAB -->
 <div class="tab" data-tab="preferences">
-    <h2>Preferences</h2>
+    <h2>Appearance</h2>
     <form id="preferencesForm" style="max-width:400px;">
-        <label style="display:block; margin-bottom:1em;">
-            Theme:
-            <select id="prefTheme">
-                <option value="system">System Default</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-            </select>
-        </label>
-        <label style="display:block; margin-bottom:1em;">
-            Default Category:
-            <select id="prefDefaultCategory">
-                <option value="Strength">Strength</option>
-                <option value="Cardio">Cardio</option>
-                <option value="Flexibility">Flexibility</option>
-            </select>
-        </label>
-        <label style="display:block; margin-bottom:1em;">
-            Default Chart Type:
-            <select id="prefChartType">
-                <option value="bar">Bar</option>
-                <option value="line">Line</option>
-            </select>
-        </label>
-        <button type="submit" style="margin-top:1em;">Save Preferences</button>
+        <fieldset style="border:none; border-bottom:1px solid #ddd; margin-bottom:1.5em; padding-bottom:1em;">
+            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Theme & Layout</legend>
+            <label style="display:block; margin-bottom:1em;">
+                Theme:
+                <select id="prefTheme">
+                    <option value="system">System Default</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Font Size:
+                <select id="prefFontSize">
+                    <option value="normal">Normal</option>
+                    <option value="large">Large</option>
+                    <option value="xlarge">Extra Large</option>
+                </select>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Font Family:
+                <select id="prefFontFamily">
+                    <option value="">Default</option>
+                    <option value="system-ui">System UI</option>
+                    <option value="serif">Serif</option>
+                    <option value="monospace">Monospace</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Courier New, monospace">Courier New</option>
+                </select>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Border Radius:
+                <input id="prefBorderRadius" max="32" min="0" step="1" style="width:120px;vertical-align:middle;"
+                       type="range"
+                       value="8"/>
+                <span id="borderRadiusValue" style="margin-left:0.5em;">8px</span>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Shadow:
+                <input id="prefShadow" max="32" min="0" step="1" style="width:120px;vertical-align:middle;" type="range"
+                       value="8"/>
+                <span id="shadowValue" style="margin-left:0.5em;">8px</span>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Transition:
+                <input id="prefTransition" max="1" min="0" step="0.05" style="width:120px;vertical-align:middle;"
+                       type="range"
+                       value="0.25"/>
+                <span id="transitionValue" style="margin-left:0.5em;">0.25s</span>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                <input id="prefRounded" type="checkbox"/>
+                Rounded Corners
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                <input id="prefCompact" type="checkbox"/>
+                Compact Layout
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Sidebar Position:
+                <select id="prefSidebarPosition">
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                </select>
+            </label>
+        </fieldset>
+
+        <fieldset style="border:none; border-bottom:1px solid #ddd; margin-bottom:1.5em; padding-bottom:1em;">
+            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Colors</legend>
+            <label style="display:block; margin-bottom:1em;">
+                Primary Color:
+                <input id="prefPrimaryColor" type="color" value="#4CAF50"/>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Accent Color:
+                <input id="prefAccentColor" type="color" value="#81c784"/>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                Chart Color:
+                <input id="prefChartColor" type="color" value="#4CAF50"/>
+            </label>
+        </fieldset>
+
+        <fieldset style="border:none; border-bottom:1px solid #ddd; margin-bottom:1.5em; padding-bottom:1em;">
+            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Chart Settings</legend>
+            <label style="display:block; margin-bottom:1em;">
+                Default Chart Type:
+                <select id="prefChartType">
+                    <option value="bar">Bar</option>
+                    <option value="line">Line</option>
+                </select>
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                <input checked id="prefShowGridlines" type="checkbox"/>
+                Show Chart Gridlines
+            </label>
+            <label style="display:block; margin-bottom:1em;">
+                <input checked id="prefChartAnimation" type="checkbox"/>
+                Chart Animation
+            </label>
+        </fieldset>
+
+        <fieldset style="border:none; margin-bottom:1.5em; padding-bottom:0;">
+            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Defaults</legend>
+            <label style="display:block; margin-bottom:1em;">
+                Default Category:
+                <select id="prefDefaultCategory">
+                    <option value="Strength">Strength</option>
+                    <option value="Cardio">Cardio</option>
+                    <option value="Flexibility">Flexibility</option>
+                </select>
+            </label>
+        </fieldset>
+
+        <button style="margin-top:1em;" type="submit">Save Appearance</button>
         <div id="preferencesStatus" style="margin-top:0.7em;color:#4CAF50;"></div>
     </form>
 </div>
