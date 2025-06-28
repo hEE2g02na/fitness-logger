@@ -18,19 +18,21 @@
 
         /* New styles for mobile navbar */
         .navbar-slideout-container {
-            display: none;
             position: fixed;
             top: 0;
-            right: 0;
-            bottom: 0;
             left: 0;
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            bottom: 0;
+            width: 90vw;
+            max-width: 340px;
             z-index: 1000;
+            background: var(--primary);
+            box-shadow: 2px 0 16px rgba(0, 0, 0, 0.18);
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
-            transition: transform 0.3s ease;
-            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+            transform: translateX(-100%);
+            overflow: hidden;
+            display: block;
         }
 
         .navbar-slideout-container.open {
@@ -54,7 +56,6 @@
         }
 
         @media (max-width: 600px) {
-            /* Show the toggle button and hide the regular navbar on mobile */
             #navbarToggle {
                 display: flex;
             }
@@ -65,6 +66,38 @@
 
             .navbar-slideout-container {
                 display: block;
+            }
+        }
+
+        @media (min-width: 601px) {
+            .navbar-slideout-container {
+                display: none !important;
+            }
+        }
+
+        /* Preferences tab styles */
+        .appearance-grid-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5em;
+        }
+
+        .appearance-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5em;
+        }
+
+        .appearance-section {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5em;
+        }
+
+        @media (max-width: 700px) {
+            .appearance-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -278,7 +311,6 @@
 <!-- ⚙️ SETTINGS TAB -->
 <div class="tab" data-tab="settings">
     <h2>Settings</h2>
-    <button id="toggleTheme" title="Switch between light and dark mode">Toggle Dark/Light Theme</button>
     <!-- Sample Data Button will be injected here by JS -->
     <section id="goalSetting">
         <h3>🎯 Set Your Goals</h3>
@@ -376,121 +408,135 @@
 <!-- ⚙️ PREFERENCES TAB -->
 <div class="tab" data-tab="preferences">
     <h2>Appearance</h2>
-    <form id="preferencesForm" style="max-width:400px;">
-        <fieldset style="border:none; border-bottom:1px solid #ddd; margin-bottom:1.5em; padding-bottom:1em;">
-            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Theme & Layout</legend>
-            <label style="display:block; margin-bottom:1em;">
-                Theme:
-                <select id="prefTheme">
-                    <option value="system">System Default</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Font Size:
-                <select id="prefFontSize">
-                    <option value="normal">Normal</option>
-                    <option value="large">Large</option>
-                    <option value="xlarge">Extra Large</option>
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Font Family:
-                <select id="prefFontFamily">
-                    <option value="">Default</option>
-                    <option value="system-ui">System UI</option>
-                    <option value="serif">Serif</option>
-                    <option value="monospace">Monospace</option>
-                    <option value="Arial, sans-serif">Arial</option>
-                    <option value="Georgia, serif">Georgia</option>
-                    <option value="Courier New, monospace">Courier New</option>
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Border Radius:
-                <input id="prefBorderRadius" max="32" min="0" step="1" style="width:120px;vertical-align:middle;"
-                       type="range"
-                       value="8"/>
-                <span id="borderRadiusValue" style="margin-left:0.5em;">8px</span>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Shadow:
-                <input id="prefShadow" max="32" min="0" step="1" style="width:120px;vertical-align:middle;" type="range"
-                       value="8"/>
-                <span id="shadowValue" style="margin-left:0.5em;">8px</span>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Transition:
-                <input id="prefTransition" max="1" min="0" step="0.05" style="width:120px;vertical-align:middle;"
-                       type="range"
-                       value="0.25"/>
-                <span id="transitionValue" style="margin-left:0.5em;">0.25s</span>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                <input id="prefRounded" type="checkbox"/>
-                Rounded Corners
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                <input id="prefCompact" type="checkbox"/>
-                Compact Layout
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Sidebar Position:
-                <select id="prefSidebarPosition">
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
-                </select>
-            </label>
-        </fieldset>
-
-        <fieldset style="border:none; border-bottom:1px solid #ddd; margin-bottom:1.5em; padding-bottom:1em;">
-            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Colors</legend>
-            <label style="display:block; margin-bottom:1em;">
-                Primary Color:
-                <input id="prefPrimaryColor" type="color" value="#4CAF50"/>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Accent Color:
-                <input id="prefAccentColor" type="color" value="#81c784"/>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                Chart Color:
-                <input id="prefChartColor" type="color" value="#4CAF50"/>
-            </label>
-        </fieldset>
-
-        <fieldset style="border:none; border-bottom:1px solid #ddd; margin-bottom:1.5em; padding-bottom:1em;">
-            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Chart Settings</legend>
-            <label style="display:block; margin-bottom:1em;">
-                Default Chart Type:
-                <select id="prefChartType">
-                    <option value="bar">Bar</option>
-                    <option value="line">Line</option>
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                <input checked id="prefShowGridlines" type="checkbox"/>
-                Show Chart Gridlines
-            </label>
-            <label style="display:block; margin-bottom:1em;">
-                <input checked id="prefChartAnimation" type="checkbox"/>
-                Chart Animation
-            </label>
-        </fieldset>
-
-        <fieldset style="border:none; margin-bottom:1.5em; padding-bottom:0;">
-            <legend style="font-weight:bold; color:#4CAF50; margin-bottom:0.5em;">Defaults</legend>
-            <label style="display:block; margin-bottom:1em;">
-                Default Category:
-                <select id="prefDefaultCategory">
-                    <option value="Strength">Strength</option>
-                    <option value="Cardio">Cardio</option>
-                    <option value="Flexibility">Flexibility</option>
-                </select>
-            </label>
-        </fieldset>
-
+    <form class="appearance-grid-form" id="preferencesForm" style="max-width:900px;">
+        <div class="appearance-grid">
+            <fieldset class="appearance-section">
+                <legend>Layout & Menus</legend>
+                <label>
+                    Icon Set:
+                    <select id="prefMenuIconSet">
+                        <option value="emoji">Emoji</option>
+                        <option value="material">Material Icons</option>
+                        <option value="fontawesome">Font Awesome</option>
+                    </select>
+                </label>
+                <label>
+                    <input id="prefIconOnly" type="checkbox"/>
+                    Icon-only Navbar (hide labels)
+                </label>
+                <label>
+                    <input checked id="prefShowLabels" type="checkbox"/>
+                    Show Navbar Labels
+                </label>
+                <label>
+                    <input id="prefCompactNavbar" type="checkbox"/>
+                    Compact Navbar/Menu
+                </label>
+                <label>
+                    <input id="prefRTL" type="checkbox"/>
+                    RTL (Right-to-Left) Layout
+                </label>
+            </fieldset>
+            <fieldset class="appearance-section">
+                <legend>Typography</legend>
+                <label>
+                    Font Size:
+                    <select id="prefFontSize">
+                        <option value="normal">Normal</option>
+                        <option value="large">Large</option>
+                        <option value="xlarge">Extra Large</option>
+                    </select>
+                </label>
+                <label>
+                    Font Family:
+                    <select id="prefFontFamily">
+                        <option value="">Default</option>
+                        <option value="system-ui">System UI</option>
+                        <option value="serif">Serif</option>
+                        <option value="monospace">Monospace</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="Courier New, monospace">Courier New</option>
+                    </select>
+                </label>
+            </fieldset>
+            <fieldset class="appearance-section">
+                <legend>Colors</legend>
+                <label>
+                    Primary Color:
+                    <input id="prefPrimaryColor" type="color" value="#4CAF50"/>
+                </label>
+                <label>
+                    Accent Color:
+                    <input id="prefAccentColor" type="color" value="#81c784"/>
+                </label>
+                <label>
+                    Chart Color:
+                    <input id="prefChartColor" type="color" value="#4CAF50"/>
+                </label>
+            </fieldset>
+            <fieldset class="appearance-section">
+                <legend>Shape & Effects</legend>
+                <label>
+                    Border Radius:
+                    <input id="prefBorderRadius" max="32" min="0" step="1" style="width:120px;vertical-align:middle;"
+                           type="range" value="8"/>
+                    <span id="borderRadiusValue" style="margin-left:0.5em;">8px</span>
+                </label>
+                <label>
+                    Shadow:
+                    <input id="prefShadow" max="32" min="0" step="1" style="width:120px;vertical-align:middle;"
+                           type="range" value="8"/>
+                    <span id="shadowValue" style="margin-left:0.5em;">8px</span>
+                </label>
+                <label>
+                    Transition:
+                    <input id="prefTransition" max="1" min="0" step="0.05" style="width:120px;vertical-align:middle;"
+                           type="range" value="0.25"/>
+                    <span id="transitionValue" style="margin-left:0.5em;">0.25s</span>
+                </label>
+                <label>
+                    <input id="prefRounded" type="checkbox"/>
+                    Rounded Corners
+                </label>
+            </fieldset>
+            <fieldset class="appearance-section">
+                <legend>Charts</legend>
+                <label>
+                    Default Chart Type:
+                    <select id="prefChartType">
+                        <option value="bar">Bar</option>
+                        <option value="line">Line</option>
+                    </select>
+                </label>
+                <label>
+                    <input checked id="prefShowGridlines" type="checkbox"/>
+                    Show Chart Gridlines
+                </label>
+                <label>
+                    <input checked id="prefChartAnimation" type="checkbox"/>
+                    Chart Animation
+                </label>
+            </fieldset>
+            <fieldset class="appearance-section">
+                <legend>Defaults</legend>
+                <label>
+                    Default Category:
+                    <select id="prefDefaultCategory">
+                        <option value="Strength">Strength</option>
+                        <option value="Cardio">Cardio</option>
+                        <option value="Flexibility">Flexibility</option>
+                    </select>
+                </label>
+                <label>
+                    Sidebar Position:
+                    <select id="prefSidebarPosition">
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                    </select>
+                </label>
+            </fieldset>
+        </div>
         <button style="margin-top:1em;" type="submit">Save Appearance</button>
         <div id="preferencesStatus" style="margin-top:0.7em;color:#4CAF50;"></div>
     </form>

@@ -842,18 +842,22 @@ body.dark .exercise-card-tags {
     left: 0;
     top: 0;
     bottom: 0;
-    width: 0;
-    z-index: 1050;
-    pointer-events: none;
-    transition: width 0.35s cubic-bezier(.4, 0, .2, 1), box-shadow 0.25s;
-    overflow: hidden;
-}
-
-.navbar-slideout-container.active {
     width: 90vw;
     max-width: 340px;
+    z-index: 1100; /* Ensure slide-out is below close button */
+    background: var(--primary);
     box-shadow: 2px 0 16px rgba(0, 0, 0, 0.18);
+    transition: transform 0.35s cubic-bezier(.4, 0, .2, 1);
+    transform: translateX(-100%);
+    overflow: visible; /* Allow close button to overflow if needed */
+    display: block !important; /* Always display slide-out container on mobile */
     pointer-events: auto;
+    /* Added padding to prevent content from sticking to edges */
+    padding: 0 1em;
+}
+
+.navbar-slideout-container.open {
+    transform: translateX(0);
 }
 
 .navbar-slideout-container .navbar-container {
@@ -862,7 +866,7 @@ body.dark .exercise-card-tags {
     border-top-right-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
     box-shadow: none;
-    display: flex;
+    display: flex !important; /* Always display inner navbar container */
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
@@ -870,6 +874,7 @@ body.dark .exercise-card-tags {
     min-width: 220px;
     width: 100%;
     pointer-events: auto;
+    overflow: visible !important; /* Ensure children are not clipped */
 }
 
 .navbar-slideout-container #navbar {
@@ -882,8 +887,10 @@ body.dark .exercise-card-tags {
     box-shadow: none;
     border-radius: 0;
     padding: 0;
-    overflow-x: visible;
-    overflow-y: auto;
+    display: flex !important; /* Ensure nav is always flex (vertical) */
+    overflow-x: visible !important;
+    overflow-y: auto !important;
+    max-height: calc(100vh - 3em); /* Prevent hiding tabs, allow scrolling if needed */
 }
 
 .navbar-slideout-container #navbar button {
@@ -896,6 +903,7 @@ body.dark .exercise-card-tags {
     font-size: 1.1em;
     gap: 0.7em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex !important; /* Always show all buttons */
 }
 
 .navbar-slideout-container #navbar button .nav-icon {
@@ -907,236 +915,152 @@ body.dark .exercise-card-tags {
     margin-top: 0;
 }
 
-#workoutTemplates {
-    background: #f0f4f8;
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    box-shadow: var(--shadow);
-    margin-bottom: 1.5rem;
+/* === Appearance: Icon-only, Compact, RTL, Label Visibility, Icon Set === */
+body.icon-only #navbar .nav-label,
+body.icon-only .navbar-slideout-container #navbar .nav-label,
+body.hide-navbar-labels #navbar .nav-label,
+body.hide-navbar-labels .navbar-slideout-container #navbar .nav-label {
+    display: none !important;
 }
 
-body.dark #workoutTemplates {
-    background: #232323;
+body.icon-only #navbar button,
+body.compact-navbar #navbar button {
+    min-width: 48px !important;
+    padding: 0.2em 0 !important;
 }
 
-#workoutTemplates h4 {
-    margin-top: 0;
+body.icon-only .navbar-slideout-container #navbar button,
+body.compact-navbar .navbar-slideout-container #navbar button {
+    padding: 1.1em 0.5em !important;
 }
 
-#templateList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+body.icon-only #navbar .nav-icon,
+body.icon-only .navbar-slideout-container #navbar .nav-icon {
+    font-size: 1.7em !important;
 }
 
-#templateList li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 0.5em;
-    padding: 0.7em 1em;
-    gap: 0.5em;
-    font-size: 1em;
+body.compact-navbar #navbar button,
+body.compact-navbar .navbar-slideout-container #navbar button {
+    font-size: 1rem !important;
+    padding: 0.1em 0 0.05em 0 !important;
+    min-width: 60px !important;
 }
 
-body.dark #templateList li {
-    background: #2a2a2a;
+body[dir="rtl"] {
+    direction: rtl;
 }
 
-#templateList .template-actions button {
-    margin-left: 0.4em;
-    font-size: 0.95em;
-    padding: 0.3em 0.8em;
+body[dir="rtl"] .navbar-container,
+body[dir="rtl"] .navbar-slideout-container {
+    left: auto;
+    right: 0;
 }
 
-#templateName {
-    padding: 0.6em;
-    font-size: 1em;
-    border-radius: var(--border-radius);
-    border: 1px solid #bdbdbd;
-    margin-bottom: 0;
+body[dir="rtl"] .navbar-slideout-container {
+    transform: translateX(100%);
 }
 
-#saveTemplateBtn {
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: var(--border-radius);
-    padding: 0.6em 1.2em;
-    cursor: pointer;
-    transition: background 0.2s;
+body[dir="rtl"] .navbar-slideout-container.open {
+    transform: translateX(0);
 }
 
-#saveTemplateBtn:hover {
-    background: var(--accent);
+body[dir="rtl"] .navbar-slideout-container .navbar-container {
+    border-top-left-radius: 0;
+    border-top-right-radius: var(--border-radius);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: var(--border-radius);
 }
 
-#remindersSection {
-    background: #f0f4f8;
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    box-shadow: var(--shadow);
-    margin-bottom: 1.5rem;
+body[dir="rtl"] .navbar-slideout-container #navbar {
+    border-radius: 0;
 }
 
-body.dark #remindersSection {
-    background: #232323;
+body[dir="rtl"] .navbar-slideout-container #navbar button {
+    justify-content: flex-end;
+    text-align: right;
 }
 
-#remindersSection h3 {
-    margin-top: 0;
+/* === Icon Font Support === */
+.material-icons, .iconify, .fa, .fas, .far, .fab {
+    font-family: 'Material Icons', 'Font Awesome 5 Free', 'Font Awesome 5 Brands', Arial, sans-serif !important;
+    font-style: normal;
+    font-weight: normal;
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    display: inline-block;
+    line-height: 1;
+    vertical-align: middle;
+    letter-spacing: normal;
+    text-transform: none;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
 }
 
-#remindersForm label {
-    display: block;
-    margin-bottom: 0.5em;
-    color: var(--primary);
-}
-
-#remindersForm input,
-#remindersForm select {
-    margin-top: 0.3em;
-    margin-bottom: 0.5em;
+/* === Appearance Tab Grid Layout === */
+.appearance-grid-form {
     width: 100%;
-    padding: 0.5em;
-    border-radius: var(--border-radius);
-    border: 1px solid #bdbdbd;
-    font-size: 1em;
+    margin: 0 auto;
     box-sizing: border-box;
 }
 
-#remindersForm button[type="submit"] {
-    margin-top: 0.5em;
-    width: auto;
-    display: inline-block;
-    padding: 0.5em 1.5em;
-    background: var(--primary);
-    color: #fff;
+.appearance-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5em 2.5em;
+    margin-bottom: 1em;
+}
+
+.appearance-section {
+    background: #f9f9f9;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1em 1.2em 0.7em 1.2em;
+    margin-bottom: 0;
+    min-width: 0;
     border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background 0.2s;
 }
 
-#remindersForm button[type="submit"]:hover {
-    background: var(--accent);
-}
-
-#goalSuggestions {
-    background: #f0f4f8;
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow);
-}
-
-body.dark #goalSuggestions {
-    background: #263238;
-}
-
-#goalSuggestions h3 {
-    margin-top: 0;
-}
-
-#goalSuggestionsContent {
-    color: #333;
-}
-
-body.dark #goalSuggestionsContent {
-    color: #eee;
-}
-
-#applyGoalSuggestionBtn {
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: var(--border-radius);
-    padding: 0.6em 1.2em;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-#applyGoalSuggestionBtn:hover {
-    background: var(--accent);
-}
-
-#achievementsSection {
-    background: #f0f4f8;
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow);
-}
-
-body.dark #achievementsSection {
-    background: #263238;
-}
-
-#achievementsSection h3 {
-    margin-top: 0;
-}
-
-#achievementsList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1em;
-    margin-top: 0.5em;
-}
-
-.achievement-badge {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #fff;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    padding: 0.7em 1.2em;
-    min-width: 110px;
-    min-height: 90px;
-    font-size: 1em;
-    color: #333;
-    opacity: 0.7;
-    transition: box-shadow 0.2s, opacity 0.2s;
-    border: 2px solid #eee;
-    position: relative;
-}
-
-.achievement-badge.unlocked {
-    opacity: 1;
-    border-color: var(--primary);
-    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.15);
-}
-
-.achievement-badge .badge-icon {
-    font-size: 2em;
-    margin-bottom: 0.2em;
-}
-
-.achievement-badge .badge-title {
+.appearance-section legend {
     font-weight: bold;
-    margin-bottom: 0.2em;
-    font-size: 1.05em;
+    color: var(--primary);
+    margin-bottom: 0.5em;
+    font-size: 1.08em;
+    letter-spacing: 0.01em;
 }
 
-.achievement-badge .badge-desc {
-    font-size: 0.95em;
-    color: #666;
-    text-align: center;
+.appearance-section label {
+    display: block;
+    margin-bottom: 0.8em;
+    font-size: 1em;
+    color: #222;
 }
 
-body.dark .achievement-badge {
-    background: #2a2a2a;
-    color: #eee;
-    border-color: #444;
+.appearance-section input[type="checkbox"] {
+    margin-right: 0.5em;
 }
 
-body.dark .achievement-badge.unlocked {
-    border-color: var(--primary);
+.appearance-section input[type="color"] {
+    margin-left: 0.5em;
+    vertical-align: middle;
 }
 
-body.dark .achievement-badge .badge-desc {
-    color: #bbb;
+.appearance-section input[type="range"] {
+    vertical-align: middle;
+    margin-left: 0.5em;
+}
+
+.appearance-section select {
+    margin-left: 0.5em;
+    min-width: 110px;
+}
+
+@media (max-width: 700px) {
+    .appearance-grid {
+        grid-template-columns: 1fr;
+        gap: 1em;
+    }
+
+    .appearance-section {
+        margin-bottom: 1em;
+    }
 }

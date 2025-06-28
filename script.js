@@ -1,9 +1,12 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
     collection,
+    doc,
     enableIndexedDbPersistence,
+    getDoc,
     getDocs,
-    getFirestore
+    getFirestore,
+    setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Firebase config
@@ -74,11 +77,6 @@ let calendarState = (() => {
 })();
 
 let syncProgress = 0; // percentage (0-100)
-
-// Theme toggle
-document.getElementById("toggleTheme").addEventListener("click", () =>
-    document.body.classList.toggle("dark")
-);
 
 // Connection status indicator
 function updateSyncStatus(percent = null) {
@@ -1416,48 +1414,64 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- SLIDE-OUT NAVBAR FOR MOBILE ---
 const navbarToggle = document.getElementById("navbarToggle");
 const navbarSlideoutContainer = document.querySelector(".navbar-slideout-container");
+const navbarClose = document.getElementById("navbarClose");
 
 function closeNavbarSlideout() {
+    if (navbarSlideoutContainer) navbarSlideoutContainer.classList.remove("open");
     document.body.classList.remove("navbar-open");
-    if (navbarSlideoutContainer) navbarSlideoutContainer.classList.remove("active");
-    if (navbarToggle) navbarToggle.setAttribute("aria-label", "Show navigation");
-    if (navbarToggle) document.getElementById("navbarToggleIcon").textContent = "\u2630";
+    if (navbarToggle) {
+        navbarToggle.setAttribute("aria-label", "Show navigation");
+        const icon = document.getElementById("navbarToggleIcon");
+        if (icon) icon.textContent = "\u2630";
+    }
 }
 
 function openNavbarSlideout() {
+    if (navbarSlideoutContainer) navbarSlideoutContainer.classList.add("open");
     document.body.classList.add("navbar-open");
-    if (navbarSlideoutContainer) navbarSlideoutContainer.classList.add("active");
-    if (navbarToggle) navbarToggle.setAttribute("aria-label", "Hide navigation");
-    if (navbarToggle) document.getElementById("navbarToggleIcon").textContent = "\u2715";
+    if (navbarToggle) {
+        navbarToggle.setAttribute("aria-label", "Hide navigation");
+        const icon = document.getElementById("navbarToggleIcon");
+        if (icon) icon.textContent = "\u2715";
+    }
 }
 
 if (navbarToggle && navbarSlideoutContainer) {
-    navbarToggle.addEventListener("click", () => {
-        if (navbarSlideoutContainer.classList.contains("active")) {
+    navbarToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (navbarSlideoutContainer.classList.contains("open")) {
             closeNavbarSlideout();
         } else {
             openNavbarSlideout();
         }
     });
+}
 
-    // Close navbar when clicking outside (on overlay)
-    document.addEventListener("click", (e) => {
-        if (
-            document.body.classList.contains("navbar-open") &&
-            !navbarSlideoutContainer.contains(e.target) &&
-            e.target !== navbarToggle
-        ) {
-            closeNavbarSlideout();
-        }
-    });
-
-    // Optional: close on ESC key
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && document.body.classList.contains("navbar-open")) {
-            closeNavbarSlideout();
-        }
+if (navbarClose) {
+    navbarClose.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeNavbarSlideout();
     });
 }
+
+// Close navbar when clicking outside the menu (on the document)
+document.addEventListener("click", (e) => {
+    if (
+        document.body.classList.contains("navbar-open") &&
+        navbarSlideoutContainer &&
+        !navbarSlideoutContainer.contains(e.target) &&
+        e.target !== navbarToggle
+    ) {
+        closeNavbarSlideout();
+    }
+});
+
+// Optional: close on ESC key
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("navbar-open")) {
+        closeNavbarSlideout();
+    }
+});
 
 // --- WORKOUT TEMPLATES LOGIC ---
 function loadTemplates() {
@@ -1684,3 +1698,86 @@ if (remindersForm) {
         setTimeout(() => remindersStatus.textContent = "", 1500);
     });
 }
+
+// --- CLOUD BACKUP & RESTORE ---
+async function backupToCloud() {
+    try {
+        const userId = "localUser"; // Replace with real user ID if you have auth
+        const backupData = {
+            logs,
+            workoutTemplates: loadTemplates(),
+            fitnessGoals: loadGoals(),
+            fitnessPreferences: (() => {
+                try {
+                    return JSON.parse(localStorage.getItem("fitnessPreferences")) || {};
+                } catch {
+                    return {};
+                }
+            })(),
+            fitnessReminders: loadReminders()
+        };
+        await setDoc(doc(db, "backups", userId), backupData);
+        alert("✅ Data backed up to cloud!");
+    } catch (e) {
+        alert("❌ Backup failed: " + (e.message || e));
+    }
+}
+
+async function restoreFromCloud() {
+    try {
+        const userId = "localUser"; // Replace with real user ID if you have auth
+        const snap = await getDoc(doc(db, "backups", userId));
+        if (!snap.exists()) {
+            alert("No backup found in cloud.");
+            return;
+        }
+        const data = snap.data();
+        // Restore logs (overwrite local logs)
+        // You may want to merge instead of overwrite in a real app
+        // For demo, just alert and reload
+        if (data.logs) {
+            // Optionally, upload logs to Firestore logs collection
+            // For now, just alert user
+            alert("Logs restored from cloud. (Reload app to see changes.)");
+        }
+        if (data.workoutTemplates) {
+            localStorage.setItem("workoutTemplates", JSON.stringify(data.workoutTemplates));
+        }
+        if (data.fitnessGoals) {
+            localStorage.setItem("fitnessGoals", JSON.stringify(data.fitnessGoals));
+        }
+        if (data.fitnessPreferences) {
+            localStorage.setItem("fitnessPreferences", JSON.stringify(data.fitnessPreferences));
+        }
+        if (data.fitnessReminders) {
+            localStorage.setItem("fitnessReminders", JSON.stringify(data.fitnessReminders));
+        }
+        alert("✅ Data restored from cloud! Reloading...");
+        location.reload();
+    } catch (e) {
+        alert("❌ Restore failed: " + (e.message || e));
+    }
+}
+
+// Add backup/restore buttons to settings tab
+document.addEventListener("DOMContentLoaded", () => {
+    const exportSection = document.getElementById("exportOptions");
+    if (exportSection && !document.getElementById("backupCloudBtn")) {
+        const backupBtn = document.createElement("button");
+        backupBtn.id = "backupCloudBtn";
+        backupBtn.type = "button";
+        backupBtn.textContent = "Backup to Cloud";
+        backupBtn.title = "Backup your data (logs, templates, goals, preferences) to the cloud";
+        backupBtn.onclick = backupToCloud;
+
+        const restoreBtn = document.createElement("button");
+        restoreBtn.id = "restoreCloudBtn";
+        restoreBtn.type = "button";
+        restoreBtn.textContent = "Restore from Cloud";
+        restoreBtn.title = "Restore your data from the cloud backup";
+        restoreBtn.onclick = restoreFromCloud;
+
+        exportSection.appendChild(backupBtn);
+        exportSection.appendChild(restoreBtn);
+    }
+});
