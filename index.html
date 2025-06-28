@@ -15,6 +15,58 @@
         .tab.active {
             display: block;
         }
+
+        /* New styles for mobile navbar */
+        .navbar-slideout-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            transition: transform 0.3s ease;
+            transform: translateX(100%);
+        }
+
+        .navbar-slideout-container.open {
+            transform: translateX(0);
+        }
+
+        #navbarToggle {
+            position: fixed;
+            bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+            left: 1.5em;
+            z-index: 1100;
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 2.5em;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: background 0.2s;
+        }
+
+        @media (max-width: 600px) {
+            /* Show the toggle button and hide the regular navbar on mobile */
+            #navbarToggle {
+                display: flex;
+            }
+
+            .navbar-container {
+                display: none;
+            }
+
+            .navbar-slideout-container {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body class="has-bottomnav">
@@ -22,9 +74,49 @@
     <progress id="syncProgressBar" max="100" style="width:120px;vertical-align:middle;" value="0"></progress>
     <span id="syncStatusLabel">🔄 Syncing...</span>
 </div>
-<h1>Fitness Logger</h1>
-
-<!-- Move navbar here, above all .tab elements -->
+<div style="display:flex;align-items:center;justify-content:center;position:relative;">
+    <!-- Hamburger toggle button (mobile only, now left of title) -->
+    <button aria-label="Show navigation" id="navbarToggle"
+            style="position:static;margin-right:0.5em;background:none;border:none;color:var(--primary);font-size:2.5em;display:none;align-items:center;justify-content:center;line-height:1;">
+        <span id="navbarToggleIcon">&#9776;</span>
+    </button>
+    <h1 style="margin:0;flex:1;text-align:center;">Fitness Logger</h1>
+</div>
+<!-- Slide-out horizontal navbar (mobile) -->
+<div class="navbar-slideout-container">
+    <div class="navbar-container">
+        <nav aria-label="Main Navigation" id="navbar" role="tablist">
+            <button aria-current="page" aria-label="Log" data-tab="log" title="Go to Log tab">
+                <span class="nav-icon">🏋️</span>
+                <span class="nav-label">Log</span>
+            </button>
+            <button aria-label="Summary" data-tab="summary" title="Go to Summary tab">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Summary</span>
+            </button>
+            <button aria-label="Performance" data-tab="performance" title="Go to Performance tab">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Performance</span>
+            </button>
+            <button aria-label="Settings" data-tab="settings" title="Go to Settings tab">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Settings</span>
+            </button>
+            <button aria-label="Diagnostics" data-tab="diagnostics" title="Go to Diagnostics tab">
+                <span class="nav-icon">🛠️</span>
+                <span class="nav-label">Diagnostics</span>
+            </button>
+            <button aria-label="Appearance" data-tab="preferences" title="Go to Appearance tab">
+                <span class="nav-icon">🎨</span>
+                <span class="nav-label">Appearance</span>
+            </button>
+            <button aria-label="Exercise Library" data-tab="exercises" title="Go to Exercise Library tab">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Exercises</span>
+            </button>
+        </nav>
+    </div>
+</div>
 <div class="navbar-container">
     <nav aria-label="Main Navigation" id="navbar" role="tablist">
         <button aria-current="page" aria-label="Log" data-tab="log" title="Go to Log tab">
@@ -116,6 +208,16 @@
         </div>
     </section>
 
+    <!-- Workout Templates Section -->
+    <section id="workoutTemplates" style="margin-bottom:1.5em;">
+        <h4>💾 Workout Templates</h4>
+        <div style="display:flex;gap:0.5em;flex-wrap:wrap;align-items:center;">
+            <input id="templateName" placeholder="Template name" style="flex:2;min-width:120px;" type="text"/>
+            <button id="saveTemplateBtn" style="flex:1;" type="button">Save as Template</button>
+        </div>
+        <ul id="templateList" style="margin-top:1em;"></ul>
+    </section>
+
     <section id="filters">
         <input id="filterExercise" placeholder="Filter by Exercise" title="Filter logs by exercise" type="text"/>
         <input id="filterDate" title="Filter logs by date" type="date"/>
@@ -160,6 +262,12 @@
     <section id="performanceSummary">
         <p>Loading performance data...</p>
     </section>
+    <!-- Achievements Section -->
+    <section id="achievementsSection"
+             style="background:#f0f4f8; border-radius:8px; padding:1em; margin-bottom:1.5em; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <h3>🏆 Achievements & Badges</h3>
+        <div id="achievementsList" style="display:flex;flex-wrap:wrap;gap:1em;"></div>
+    </section>
     <section id="personalRecords">
         <h3>🏅 Personal Records History</h3>
         <ul id="prList"></ul>
@@ -198,9 +306,45 @@
         </form>
         <div id="goalStatus"></div>
     </section>
+    <!-- Goal Suggestions Section -->
+    <section id="goalSuggestions"
+             style="background:#f0f4f8; border-radius:8px; padding:1em; margin-bottom:1.5em; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <h3>🤖 Goal Suggestions</h3>
+        <div id="goalSuggestionsContent" style="color:#333; font-size:1em;"></div>
+        <button id="applyGoalSuggestionBtn" style="margin-top:0.7em; display:none;">Apply Suggested Goals</button>
+    </section>
     <div id="sampleButtons" style="margin:1em 0; display:flex; flex-wrap:wrap; gap:0.5em;">
         <!-- Buttons injected by JS -->
     </div>
+    <!-- Reminders Section -->
+    <section id="remindersSection" style="margin-bottom:1.5em;">
+        <h3>⏰ Reminders & Notifications</h3>
+        <form id="remindersForm" style="display:flex;flex-direction:column;gap:1em;max-width:400px;">
+            <label>
+                Workout Reminder Time:
+                <input id="reminderWorkoutTime" type="time"/>
+            </label>
+            <label>
+                Hydration Reminder Interval (hours):
+                <input id="reminderHydrationInterval" max="12" min="1" type="number"/>
+            </label>
+            <label>
+                Rest Day (0=Sunday, 6=Saturday):
+                <select id="reminderRestDay">
+                    <option value="">None</option>
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                </select>
+            </label>
+            <button type="submit">Save Reminders</button>
+        </form>
+        <div id="remindersStatus" style="margin-top:0.7em;color:#4CAF50;"></div>
+    </section>
     <section id="exportOptions" style="margin:1.5em 0;">
         <h3 style="margin-bottom:0.5em;">Export Options</h3>
         <button id="exportJSON" title="Export your logs as a JSON file">Export JSON</button>

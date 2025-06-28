@@ -56,6 +56,14 @@ const circuitExercisesDiv = document.getElementById("circuitExercises");
 const addExerciseToCircuitBtn = document.getElementById("addExerciseToCircuitBtn");
 const saveCircuitBtn = document.getElementById("saveCircuitBtn");
 const cancelCircuitBtn = document.getElementById("cancelCircuitBtn");
+const templateNameInput = document.getElementById("templateName");
+const saveTemplateBtn = document.getElementById("saveTemplateBtn");
+const templateList = document.getElementById("templateList");
+const remindersForm = document.getElementById("remindersForm");
+const remindersStatus = document.getElementById("remindersStatus");
+const reminderWorkoutTime = document.getElementById("reminderWorkoutTime");
+const reminderHydrationInterval = document.getElementById("reminderHydrationInterval");
+const reminderRestDay = document.getElementById("reminderRestDay");
 
 let logs = [];
 let editingId = null;
@@ -514,109 +522,112 @@ function renderCircuitExercises() {
             ex.tags = parseTags(e.target.value);
         };
         circuitExercisesDiv.appendChild(tr);
+    });
+}
+
 // --- EXERCISE LIBRARY DATA ---
-        const EXERCISE_LIBRARY = [
-            {
-                name: "Bench Press",
-                category: "Strength",
-                tags: ["chest", "push", "barbell"],
-                instructions: "Lie on a bench, grip the bar slightly wider than shoulder-width, lower to chest, press up.",
-                img: "https://assets.fitnesslogger.app/exercises/bench-press.jpg"
-            },
-            {
-                name: "Squat",
-                category: "Strength",
-                tags: ["legs", "barbell", "compound"],
-                instructions: "Stand with feet shoulder-width, bar on upper back, squat down keeping chest up, drive up.",
-                img: "https://assets.fitnesslogger.app/exercises/squat.jpg"
-            },
-            {
-                name: "Deadlift",
-                category: "Strength",
-                tags: ["back", "legs", "barbell", "pull"],
-                instructions: "Stand with feet hip-width, grip bar, keep back flat, lift by extending hips and knees.",
-                img: "https://assets.fitnesslogger.app/exercises/deadlift.jpg"
-            },
-            {
-                name: "Push Up",
-                category: "Strength",
-                tags: ["chest", "push", "bodyweight"],
-                instructions: "Start in plank, lower chest to floor, keep elbows at 45°, push back up.",
-                img: "https://assets.fitnesslogger.app/exercises/push-up.jpg"
-            },
-            {
-                name: "Pull Up",
-                category: "Strength",
-                tags: ["back", "pull", "bodyweight"],
-                instructions: "Hang from bar, pull chin above bar, lower with control.",
-                img: "https://assets.fitnesslogger.app/exercises/pull-up.jpg"
-            },
-            {
-                name: "Plank",
-                category: "Flexibility",
-                tags: ["core", "bodyweight"],
-                instructions: "Hold a straight line from head to heels, elbows under shoulders, brace core.",
-                img: "https://assets.fitnesslogger.app/exercises/plank.jpg"
-            },
-            {
-                name: "Bicep Curl",
-                category: "Strength",
-                tags: ["arms", "dumbbell", "isolation"],
-                instructions: "Hold dumbbells, curl up keeping elbows at sides, lower slowly.",
-                img: "https://assets.fitnesslogger.app/exercises/bicep-curl.jpg"
-            },
-            {
-                name: "Tricep Dip",
-                category: "Strength",
-                tags: ["arms", "push", "bodyweight"],
-                instructions: "Hands on bench, lower body by bending elbows, press up.",
-                img: "https://assets.fitnesslogger.app/exercises/tricep-dip.jpg"
-            },
-            {
-                name: "Lunge",
-                category: "Strength",
-                tags: ["legs", "bodyweight"],
-                instructions: "Step forward, lower until both knees at 90°, push back to start.",
-                img: "https://assets.fitnesslogger.app/exercises/lunge.jpg"
-            },
-            {
-                name: "Burpee",
-                category: "Cardio",
-                tags: ["full body", "bodyweight", "cardio"],
-                instructions: "Squat, kick feet back, push up, jump up.",
-                img: "https://assets.fitnesslogger.app/exercises/burpee.jpg"
-            },
-            {
-                name: "Jump Rope",
-                category: "Cardio",
-                tags: ["cardio", "conditioning"],
-                instructions: "Jump over rope with both feet, keep elbows close, turn rope with wrists.",
-                img: "https://assets.fitnesslogger.app/exercises/jump-rope.jpg"
-            },
-            {
-                name: "Mountain Climber",
-                category: "Cardio",
-                tags: ["core", "cardio", "bodyweight"],
-                instructions: "Start in plank, alternate driving knees to chest quickly.",
-                img: "https://assets.fitnesslogger.app/exercises/mountain-climber.jpg"
-            }
-            // Add more as needed
-        ];
+const EXERCISE_LIBRARY = [
+    {
+        name: "Bench Press",
+        category: "Strength",
+        tags: ["chest", "push", "barbell"],
+        instructions: "Lie on a bench, grip the bar slightly wider than shoulder-width, lower to chest, press up.",
+        img: "https://assets.fitnesslogger.app/exercises/bench-press.jpg"
+    },
+    {
+        name: "Squat",
+        category: "Strength",
+        tags: ["legs", "barbell", "compound"],
+        instructions: "Stand with feet shoulder-width, bar on upper back, squat down keeping chest up, drive up.",
+        img: "https://assets.fitnesslogger.app/exercises/squat.jpg"
+    },
+    {
+        name: "Deadlift",
+        category: "Strength",
+        tags: ["back", "legs", "barbell", "pull"],
+        instructions: "Stand with feet hip-width, grip bar, keep back flat, lift by extending hips and knees.",
+        img: "https://assets.fitnesslogger.app/exercises/deadlift.jpg"
+    },
+    {
+        name: "Push Up",
+        category: "Strength",
+        tags: ["chest", "push", "bodyweight"],
+        instructions: "Start in plank, lower chest to floor, keep elbows at 45°, push back up.",
+        img: "https://assets.fitnesslogger.app/exercises/push-up.jpg"
+    },
+    {
+        name: "Pull Up",
+        category: "Strength",
+        tags: ["back", "pull", "bodyweight"],
+        instructions: "Hang from bar, pull chin above bar, lower with control.",
+        img: "https://assets.fitnesslogger.app/exercises/pull-up.jpg"
+    },
+    {
+        name: "Plank",
+        category: "Flexibility",
+        tags: ["core", "bodyweight"],
+        instructions: "Hold a straight line from head to heels, elbows under shoulders, brace core.",
+        img: "https://assets.fitnesslogger.app/exercises/plank.jpg"
+    },
+    {
+        name: "Bicep Curl",
+        category: "Strength",
+        tags: ["arms", "dumbbell", "isolation"],
+        instructions: "Hold dumbbells, curl up keeping elbows at sides, lower slowly.",
+        img: "https://assets.fitnesslogger.app/exercises/bicep-curl.jpg"
+    },
+    {
+        name: "Tricep Dip",
+        category: "Strength",
+        tags: ["arms", "push", "bodyweight"],
+        instructions: "Hands on bench, lower body by bending elbows, press up.",
+        img: "https://assets.fitnesslogger.app/exercises/tricep-dip.jpg"
+    },
+    {
+        name: "Lunge",
+        category: "Strength",
+        tags: ["legs", "bodyweight"],
+        instructions: "Step forward, lower until both knees at 90°, push back to start.",
+        img: "https://assets.fitnesslogger.app/exercises/lunge.jpg"
+    },
+    {
+        name: "Burpee",
+        category: "Cardio",
+        tags: ["full body", "bodyweight", "cardio"],
+        instructions: "Squat, kick feet back, push up, jump up.",
+        img: "https://assets.fitnesslogger.app/exercises/burpee.jpg"
+    },
+    {
+        name: "Jump Rope",
+        category: "Cardio",
+        tags: ["cardio", "conditioning"],
+        instructions: "Jump over rope with both feet, keep elbows close, turn rope with wrists.",
+        img: "https://assets.fitnesslogger.app/exercises/jump-rope.jpg"
+    },
+    {
+        name: "Mountain Climber",
+        category: "Cardio",
+        tags: ["core", "cardio", "bodyweight"],
+        instructions: "Start in plank, alternate driving knees to chest quickly.",
+        img: "https://assets.fitnesslogger.app/exercises/mountain-climber.jpg"
+    }
+    // Add more as needed
+];
 
 // --- EXERCISE LIBRARY UI ---
-        const exerciseSearch = document.getElementById("exerciseSearch");
-        const exerciseList = document.getElementById("exerciseList");
+const exerciseSearch = document.getElementById("exerciseSearch");
+const exerciseList = document.getElementById("exerciseList");
 
-        function renderExerciseLibrary(filter = "") {
-            if (!exerciseList) return;
-            const q = (filter || "").toLowerCase();
-            const filtered = EXERCISE_LIBRARY.filter(ex =>
-                ex.name.toLowerCase().includes(q) ||
-                ex.category.toLowerCase().includes(q) ||
-                (ex.tags && ex.tags.some(tag => tag.includes(q)))
-            );
-            exerciseList.innerHTML = filtered.length
-                ? filtered.map(ex => `
+function renderExerciseLibrary(filter = "") {
+    if (!exerciseList) return;
+    const q = (filter || "").toLowerCase();
+    const filtered = EXERCISE_LIBRARY.filter(ex =>
+        ex.name.toLowerCase().includes(q) ||
+        ex.category.toLowerCase().includes(q) ||
+        (ex.tags && ex.tags.some(tag => tag.includes(q)))
+    );
+    exerciseList.innerHTML = filtered.length
+        ? filtered.map(ex => `
             <div class="exercise-card">
                 <div class="exercise-card-title">${ex.name}</div>
                 <img class="exercise-card-img" src="${ex.img}" alt="${ex.name} image" loading="lazy" />
@@ -625,72 +636,238 @@ function renderCircuitExercises() {
                 <div class="exercise-card-tags">${ex.tags.map(t => "#" + t).join(" ")}</div>
             </div>
         `).join("")
-                : `<div style="grid-column:1/-1;text-align:center;color:#888;">No exercises found.</div>`;
-        }
+        : `<div style="grid-column:1/-1;text-align:center;color:#888;">No exercises found.</div>`;
+}
 
-        if (exerciseSearch) {
-            exerciseSearch.addEventListener("input", e => {
-                renderExerciseLibrary(e.target.value);
-            });
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            renderExerciseLibrary();
-        });
-
+if (exerciseSearch) {
+    exerciseSearch.addEventListener("input", e => {
+        renderExerciseLibrary(e.target.value);
     });
 }
 
-if (addCircuitBtn) {
-    addCircuitBtn.onclick = () => {
-        showCircuitBuilder(true);
-        resetCircuitBuilder();
-        renderCircuitExercises();
+document.addEventListener("DOMContentLoaded", () => {
+    renderExerciseLibrary();
+});
+
+// --- GOAL SUGGESTIONS LOGIC ---
+const goalSuggestionsContent = document.getElementById("goalSuggestionsContent");
+const applyGoalSuggestionBtn = document.getElementById("applyGoalSuggestionBtn");
+
+function analyzeGoalSuggestions(logs) {
+    if (!logs.length) return null;
+    // Analyze last 14 days for trends
+    const today = new Date();
+    const days = [];
+    for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        days.push(d.toISOString().split("T")[0]);
+    }
+    const logs14 = logs.filter(l => days.includes(l.date));
+    if (!logs14.length) return null;
+
+    // Calculate daily/weekly averages
+    let totalVol = 0, totalSets = 0, totalSessions = 0;
+    let weekVol = 0, weekSessions = 0;
+    const weekDays = days.slice(0, 7);
+    const weekLogs = logs.filter(l => weekDays.includes(l.date));
+    weekLogs.forEach(l => {
+        weekVol += (l.sets * l.reps * l.weight);
+        weekSessions++;
+    });
+    logs14.forEach(l => {
+        totalVol += (l.sets * l.reps * l.weight);
+        totalSets += l.sets;
+        totalSessions++;
+    });
+    const avgVol = Math.round(totalVol / 14);
+    const avgSets = Math.round(totalSets / 14);
+    const avgSessions = Math.round(totalSessions / 14);
+
+    // Suggest slightly higher goals if user is consistent, else match average
+    let suggestion = {
+        goalVolume: avgVol > 0 ? avgVol + 0.1 * avgVol : 0,
+        goalSets: avgSets > 0 ? avgSets + 1 : 0,
+        goalSessions: avgSessions > 0 ? avgSessions + 1 : 0,
+        goalWeeklyVolume: weekVol > 0 ? weekVol + 0.1 * weekVol : 0
     };
+    // Round to nearest 5 or 10 for volume
+    suggestion.goalVolume = Math.round(suggestion.goalVolume / 5) * 5;
+    suggestion.goalWeeklyVolume = Math.round(suggestion.goalWeeklyVolume / 10) * 10;
+    suggestion.goalSets = Math.round(suggestion.goalSets);
+    suggestion.goalSessions = Math.round(suggestion.goalSessions);
+
+    return suggestion;
 }
-if (addExerciseToCircuitBtn) {
-    addExerciseToCircuitBtn.onclick = () => {
-        circuitExercises.push({
-            exercise: "",
-            sets: 1,
-            reps: 1,
-            weight: 0,
-            category: "Strength",
-            tags: []
-        });
-        renderCircuitExercises();
-    };
-}
-if (cancelCircuitBtn) {
-    cancelCircuitBtn.onclick = () => {
-        showCircuitBuilder(false);
-    };
-}
-if (saveCircuitBtn) {
-    saveCircuitBtn.onclick = async () => {
-        // Validate all exercises
-        if (!circuitExercises.length || circuitExercises.some(ex => !ex.exercise || !ex.sets || !ex.reps)) {
-            alert("Please fill out all exercises in the circuit.");
-            return;
+
+function renderGoalSuggestions() {
+    if (!goalSuggestionsContent) return;
+    const suggestion = analyzeGoalSuggestions(logs);
+    if (!suggestion) {
+        goalSuggestionsContent.innerHTML = "<em>Not enough data yet. Log more workouts to get suggestions!</em>";
+        if (applyGoalSuggestionBtn) applyGoalSuggestionBtn.style.display = "none";
+        return;
+    }
+    goalSuggestionsContent.innerHTML = `
+        <div>Based on your last 2 weeks:</div>
+        <ul style="margin:0.5em 0 0 1.2em;">
+            <li>Suggested Daily Volume: <b>${suggestion.goalVolume} lbs</b></li>
+            <li>Suggested Daily Sets: <b>${suggestion.goalSets}</b></li>
+            <li>Suggested Daily Sessions: <b>${suggestion.goalSessions}</b></li>
+            <li>Suggested Weekly Volume: <b>${suggestion.goalWeeklyVolume} lbs</b></li>
+        </ul>
+        <div style="color:#888;font-size:0.97em;">(Suggestions are based on your recent averages and trends.)</div>
+    `;
+    if (applyGoalSuggestionBtn) applyGoalSuggestionBtn.style.display = "";
+    applyGoalSuggestionBtn.onclick = () => {
+        if (!suggestion) return;
+        if (goalForm) {
+            goalForm.goalVolume.value = suggestion.goalVolume;
+            goalForm.goalSets.value = suggestion.goalSets;
+            goalForm.goalSessions.value = suggestion.goalSessions;
+            goalForm.goalWeeklyVolume.value = suggestion.goalWeeklyVolume;
         }
-        const date = form.date.value || new Date().toISOString().split("T")[0];
-        const circuitLog = {
-            date,
-            isCircuit: true,
-            exercises: circuitExercises.map(ex => ({
-                exercise: ex.exercise,
-                sets: ex.sets,
-                reps: ex.reps,
-                weight: ex.weight,
-                category: ex.category,
-                tags: ex.tags || []
-            }))
-        };
-        await saveLog(circuitLog);
-        showCircuitBuilder(false);
-        form.reset();
+        goalSuggestionsContent.innerHTML += `<div style="color:var(--primary);margin-top:0.5em;">Suggested goals filled in the form!</div>`;
+        applyGoalSuggestionBtn.style.display = "none";
     };
 }
+
+// Re-render suggestions when logs change
+document.addEventListener("DOMContentLoaded", renderGoalSuggestions);
+
+function afterLogsLoaded() {
+    renderGoalSuggestions();
+    renderAchievements();
+}
+
+function fetchLogsWrapper() {
+    fetchLogs().then(afterLogsLoaded);
+}
+
+fetchLogsWrapper();
+
+// --- OFFLINE SUPPORT: Register Service Worker ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').then(
+            reg => {
+                // console.log('Service worker registered.', reg);
+            },
+            err => {
+                // console.warn('Service worker registration failed:', err);
+            }
+        );
+    });
+}
+
+// --- ACHIEVEMENTS & BADGES LOGIC ---
+const achievementsList = document.getElementById("achievementsList");
+
+const ACHIEVEMENTS = [
+    {
+        id: "first_log",
+        icon: "📝",
+        title: "First Log",
+        desc: "Log your first workout.",
+        check: logs => logs.length >= 1
+    },
+    {
+        id: "streak_3",
+        icon: "🔥",
+        title: "3-Day Streak",
+        desc: "Log workouts 3 days in a row.",
+        check: logs => getStreak(logs, "day") >= 3
+    },
+    {
+        id: "streak_7",
+        icon: "🔥",
+        title: "7-Day Streak",
+        desc: "Log workouts 7 days in a row.",
+        check: logs => getStreak(logs, "day") >= 7
+    },
+    {
+        id: "volume_10k",
+        icon: "💪",
+        title: "10,000 lbs Club",
+        desc: "Lift a total of 10,000 lbs (all time).",
+        check: logs => logs.reduce((sum, l) => sum + (l.sets * l.reps * l.weight), 0) >= 10000
+    },
+    {
+        id: "volume_50k",
+        icon: "🏋️",
+        title: "50,000 lbs Club",
+        desc: "Lift a total of 50,000 lbs (all time).",
+        check: logs => logs.reduce((sum, l) => sum + (l.sets * l.reps * l.weight), 0) >= 50000
+    },
+    {
+        id: "weekly_5",
+        icon: "📅",
+        title: "5 Workouts in a Week",
+        desc: "Log 5 workouts in any 7-day period.",
+        check: logs => {
+            if (!logs.length) return false;
+            const dates = logs.map(l => l.date).sort();
+            for (let i = 0; i < dates.length - 4; i++) {
+                const start = new Date(dates[i]);
+                let count = 1;
+                for (let j = i + 1; j < dates.length; j++) {
+                    const d = new Date(dates[j]);
+                    if ((d - start) / (1000 * 60 * 60 * 24) <= 6) count++;
+                    if (count >= 5) return true;
+                }
+            }
+            return false;
+        }
+    },
+    {
+        id: "circuit_master",
+        icon: "🔄",
+        title: "Circuit Master",
+        desc: "Log 10 circuit workouts.",
+        check: logs => logs.filter(l => l.isCircuit).length >= 10
+    },
+    {
+        id: "template_user",
+        icon: "💾",
+        title: "Template User",
+        desc: "Save 3 workout templates.",
+        check: () => {
+            try {
+                const tpls = JSON.parse(localStorage.getItem("workoutTemplates")) || [];
+                return tpls.length >= 3;
+            } catch {
+                return false;
+            }
+        }
+    }
+    // Add more as desired
+];
+
+function renderAchievements() {
+    if (!achievementsList) return;
+    const unlocked = {};
+    ACHIEVEMENTS.forEach(a => {
+        try {
+            unlocked[a.id] = a.check(logs);
+        } catch {
+            unlocked[a.id] = false;
+        }
+    });
+    achievementsList.innerHTML = ACHIEVEMENTS.map(a => `
+        <div class="achievement-badge${unlocked[a.id] ? " unlocked" : ""}" title="${a.title}">
+            <span class="badge-icon">${a.icon}</span>
+            <span class="badge-title">${a.title}</span>
+            <span class="badge-desc">${a.desc}</span>
+            ${unlocked[a.id] ? `<span style="color:var(--primary);font-size:1.2em;position:absolute;top:0.3em;right:0.7em;">✔️</span>` : ""}
+        </div>
+    `).join("");
+}
+
+// Re-render achievements when logs or templates change
+document.addEventListener("DOMContentLoaded", renderAchievements);
+window.addEventListener("storage", e => {
+    if (e.key === "workoutTemplates") renderAchievements();
+});
 
 // --- SAVE LOG (support circuits) ---
 async function saveLog(log) {
@@ -704,28 +881,47 @@ async function saveLog(log) {
 }
 
 // --- TAB SYSTEM: Click & Keyboard Navigation, Accessibility ---
-function initTabSwitcher() {
-    const nav = document.getElementById('navbar');
-    if (!nav) {
-        console.warn('Navbar element with id="navbar" not found.');
-        return;
-    }
-    const tabButtons = nav.querySelectorAll('button[data-tab]');
-    const tabs = document.querySelectorAll('.tab');
-
-    nav.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-tab]');
-        if (btn) {
-            const tabName = btn.getAttribute('data-tab');
-            // Remove active/aria-current from all
-            tabButtons.forEach(b => b.removeAttribute('aria-current'));
-            tabs.forEach(tab => tab.classList.remove('active'));
-            // Set active/aria-current on selected
-            btn.setAttribute('aria-current', 'page');
-            const activeTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
-            if (activeTab) activeTab.classList.add('active');
+function setActiveTab(tabName) {
+    // Set active/aria-current on all navbars
+    document.querySelectorAll('#navbar').forEach(nav => {
+        nav.querySelectorAll('button[data-tab]').forEach(btn => {
+            if (btn.getAttribute('data-tab') === tabName) {
+                btn.setAttribute('aria-current', 'page');
+            } else {
+                btn.removeAttribute('aria-current');
+            }
+        });
+    });
+    // Show the correct tab content
+    document.querySelectorAll('.tab').forEach(tab => {
+        if (tab.getAttribute('data-tab') === tabName) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
         }
     });
+}
+
+function initTabSwitcher() {
+    // Listen for tab clicks on all navbars (desktop and mobile)
+    document.querySelectorAll('#navbar').forEach(nav => {
+        nav.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-tab]');
+            if (btn) {
+                const tabName = btn.getAttribute('data-tab');
+                setActiveTab(tabName);
+                // If mobile navbar is open, close it after switching
+                if (document.body.classList.contains("navbar-open")) {
+                    closeNavbarSlideout();
+                }
+            }
+        });
+    });
+    // Set initial tab based on the first button with aria-current
+    const initialBtn = document.querySelector('#navbar button[aria-current="page"]');
+    if (initialBtn) {
+        setActiveTab(initialBtn.getAttribute('data-tab'));
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1260,5 +1456,231 @@ if (navbarToggle && navbarSlideoutContainer) {
         if (e.key === "Escape" && document.body.classList.contains("navbar-open")) {
             closeNavbarSlideout();
         }
+    });
+}
+
+// --- WORKOUT TEMPLATES LOGIC ---
+function loadTemplates() {
+    try {
+        return JSON.parse(localStorage.getItem("workoutTemplates")) || [];
+    } catch {
+        return [];
+    }
+}
+
+function saveTemplates(templates) {
+    localStorage.setItem("workoutTemplates", JSON.stringify(templates));
+}
+
+function renderTemplates() {
+    if (!templateList) return;
+    const templates = loadTemplates();
+    templateList.innerHTML = templates.length
+        ? templates.map((tpl, idx) => `
+            <li>
+                <span>
+                    <b>${tpl.name}</b>
+                    <span style="color:#888;font-size:0.95em;">
+                        (${tpl.isCircuit ? "Circuit" : "Single"})
+                    </span>
+                </span>
+                <span class="template-actions">
+                    <button type="button" title="Load template" onclick="loadTemplate(${idx})">Load</button>
+                    <button type="button" title="Delete template" onclick="deleteTemplate(${idx})">Delete</button>
+                </span>
+            </li>
+        `).join("")
+        : `<li style="color:#888;">No templates saved.</li>`;
+}
+
+// Save current log form or circuit as template
+if (saveTemplateBtn) {
+    saveTemplateBtn.onclick = () => {
+        const name = (templateNameInput.value || "").trim();
+        if (!name) {
+            alert("Please enter a template name.");
+            return;
+        }
+        let tpl;
+        if (circuitBuilder && circuitBuilder.style.display !== "none" && circuitExercises.length) {
+            // Save circuit as template
+            tpl = {
+                name,
+                isCircuit: true,
+                exercises: circuitExercises.map(ex => ({
+                    exercise: ex.exercise,
+                    sets: ex.sets,
+                    reps: ex.reps,
+                    weight: ex.weight,
+                    category: ex.category,
+                    tags: ex.tags || []
+                }))
+            };
+        } else {
+            // Save single log form as template
+            if (!form.exercise.value || !form.sets.value || !form.reps.value) {
+                alert("Please fill out the exercise, sets, and reps fields.");
+                return;
+            }
+            tpl = {
+                name,
+                isCircuit: false,
+                exercise: form.exercise.value,
+                sets: parseInt(form.sets.value),
+                reps: parseInt(form.reps.value),
+                weight: parseInt(form.weight.value || 0),
+                category: form.category.value,
+                tags: parseTags(tagsInput.value)
+            };
+        }
+        const templates = loadTemplates();
+        templates.push(tpl);
+        saveTemplates(templates);
+        templateNameInput.value = "";
+        renderTemplates();
+    };
+}
+
+// Load template into form or circuit builder
+window.loadTemplate = function (idx) {
+    const templates = loadTemplates();
+    const tpl = templates[idx];
+    if (!tpl) return;
+    if (tpl.isCircuit) {
+        showCircuitBuilder(true);
+        circuitExercises.length = 0;
+        tpl.exercises.forEach(ex => {
+            circuitExercises.push({...ex});
+        });
+        renderCircuitExercises();
+    } else {
+        showCircuitBuilder(false);
+        form.exercise.value = tpl.exercise;
+        form.sets.value = tpl.sets;
+        form.reps.value = tpl.reps;
+        form.weight.value = tpl.weight;
+        form.category.value = tpl.category;
+        tagsInput.value = tagsToString(tpl.tags);
+    }
+    // Optionally highlight the form/circuit builder
+    if (tpl.isCircuit && circuitBuilder) {
+        circuitBuilder.classList.add("highlight");
+        setTimeout(() => circuitBuilder.classList.remove("highlight"), 1000);
+    } else if (form) {
+        form.classList.add("highlight");
+        setTimeout(() => form.classList.remove("highlight"), 1000);
+    }
+};
+
+// Delete template
+window.deleteTemplate = function (idx) {
+    if (!confirm("Delete this template?")) return;
+    const templates = loadTemplates();
+    templates.splice(idx, 1);
+    saveTemplates(templates);
+    renderTemplates();
+};
+
+// Render templates on load
+document.addEventListener("DOMContentLoaded", renderTemplates);
+
+// --- REMINDERS & NOTIFICATIONS LOGIC ---
+function loadReminders() {
+    try {
+        return JSON.parse(localStorage.getItem("fitnessReminders")) || {};
+    } catch {
+        return {};
+    }
+}
+
+function saveReminders(reminders) {
+    localStorage.setItem("fitnessReminders", JSON.stringify(reminders));
+}
+
+function requestNotificationPermission() {
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+}
+
+function showNotification(title, body) {
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, {body});
+    }
+}
+
+// Schedule workout reminder
+function scheduleWorkoutReminder(timeStr) {
+    if (!timeStr) return;
+    const now = new Date();
+    const [h, m] = timeStr.split(":").map(Number);
+    const next = new Date();
+    next.setHours(h, m, 0, 0);
+    if (next < now) next.setDate(next.getDate() + 1);
+    const ms = next - now;
+    setTimeout(() => {
+        showNotification("🏋️ Workout Reminder", "It's time for your workout!");
+        // Reschedule for next day
+        scheduleWorkoutReminder(timeStr);
+    }, ms);
+}
+
+// Schedule hydration reminder
+function scheduleHydrationReminder(intervalHours) {
+    if (!intervalHours || intervalHours < 1) return;
+    setInterval(() => {
+        showNotification("💧 Hydration Reminder", "Time to drink some water!");
+    }, intervalHours * 60 * 60 * 1000);
+}
+
+// Schedule rest day reminder
+function scheduleRestDayReminder(dayIdx) {
+    if (dayIdx === "" || dayIdx === null || dayIdx === undefined) return;
+    const now = new Date();
+    const todayIdx = now.getDay();
+    let daysUntil = (parseInt(dayIdx) - todayIdx + 7) % 7;
+    if (daysUntil === 0) daysUntil = 7;
+    const ms = daysUntil * 24 * 60 * 60 * 1000;
+    setTimeout(() => {
+        showNotification("🛌 Rest Day Reminder", "Today is your scheduled rest day!");
+        // Reschedule for next week
+        scheduleRestDayReminder(dayIdx);
+    }, ms);
+}
+
+// Load reminders on page load
+document.addEventListener("DOMContentLoaded", () => {
+    const reminders = loadReminders();
+    if (reminderWorkoutTime && reminders.workoutTime) reminderWorkoutTime.value = reminders.workoutTime;
+    if (reminderHydrationInterval && reminders.hydrationInterval) reminderHydrationInterval.value = reminders.hydrationInterval;
+    if (reminderRestDay && reminders.restDay !== undefined) reminderRestDay.value = reminders.restDay;
+
+    // Schedule reminders if permission granted
+    if ("Notification" in window && Notification.permission === "granted") {
+        if (reminders.workoutTime) scheduleWorkoutReminder(reminders.workoutTime);
+        if (reminders.hydrationInterval) scheduleHydrationReminder(reminders.hydrationInterval);
+        if (reminders.restDay !== "" && reminders.restDay !== undefined) scheduleRestDayReminder(reminders.restDay);
+    }
+});
+
+// Save reminders and schedule notifications
+if (remindersForm) {
+    remindersForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const reminders = {
+            workoutTime: reminderWorkoutTime.value,
+            hydrationInterval: parseInt(reminderHydrationInterval.value) || "",
+            restDay: reminderRestDay.value
+        };
+        saveReminders(reminders);
+        remindersStatus.textContent = "Reminders saved!";
+        requestNotificationPermission();
+        // Schedule reminders if permission granted
+        if ("Notification" in window && Notification.permission === "granted") {
+            if (reminders.workoutTime) scheduleWorkoutReminder(reminders.workoutTime);
+            if (reminders.hydrationInterval) scheduleHydrationReminder(reminders.hydrationInterval);
+            if (reminders.restDay !== "" && reminders.restDay !== undefined) scheduleRestDayReminder(reminders.restDay);
+        }
+        setTimeout(() => remindersStatus.textContent = "", 1500);
     });
 }
