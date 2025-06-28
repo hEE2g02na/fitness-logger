@@ -15,77 +15,47 @@
         .tab.active {
             display: block;
         }
-
-        /* Navbar toggle button styles */
-        #navbarToggle {
-            position: fixed;
-            bottom: 1.5em;
-            right: 1.5em;
-            z-index: 1100;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 54px;
-            height: 54px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            transition: background 0.2s;
-        }
-
-        /* Hide the navbar by default on small screens */
-        @media (max-width: 600px) {
-            .navbar-container {
-                display: none;
-            }
-
-            #navbarToggle {
-                display: flex;
-            }
-        }
     </style>
 </head>
 <body class="has-bottomnav">
-<!-- Navbar Toggle Button (Hamburger) -->
-<button aria-label="Show navigation" id="navbarToggle">
-    <span id="navbarToggleIcon">&#9776;</span>
-</button>
-<div class="navbar-slide-container">
-    <div class="navbar-container">
-        <nav aria-label="Main Navigation" id="navbar" role="tablist">
-            <button aria-current="page" aria-label="Log" data-tab="log" title="Go to Log tab">
-                <span class="nav-icon">🏋️</span>
-                <span class="nav-label">Log</span>
-            </button>
-            <button aria-label="Summary" data-tab="summary" title="Go to Summary tab">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label">Summary</span>
-            </button>
-            <button aria-label="Performance" data-tab="performance" title="Go to Performance tab">
-                <span class="nav-icon">📈</span>
-                <span class="nav-label">Performance</span>
-            </button>
-            <button aria-label="Settings" data-tab="settings" title="Go to Settings tab">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-label">Settings</span>
-            </button>
-            <button aria-label="Diagnostics" data-tab="diagnostics" title="Go to Diagnostics tab">
-                <span class="nav-icon">🛠️</span>
-                <span class="nav-label">Diagnostics</span>
-            </button>
-            <button aria-label="Appearance" data-tab="preferences" title="Go to Appearance tab">
-                <span class="nav-icon">🎨</span>
-                <span class="nav-label">Appearance</span>
-            </button>
-            <button aria-label="Exercise Library" data-tab="exercises" title="Go to Exercise Library tab">
-                <span class="nav-icon">📚</span>
-                <span class="nav-label">Exercises</span>
-            </button>
-        </nav>
-    </div>
+<div id="syncStatus" title="Shows your sync/connection status">
+    <progress id="syncProgressBar" max="100" style="width:120px;vertical-align:middle;" value="0"></progress>
+    <span id="syncStatusLabel">🔄 Syncing...</span>
+</div>
+<h1>Fitness Logger</h1>
+
+<!-- Move navbar here, above all .tab elements -->
+<div class="navbar-container">
+    <nav aria-label="Main Navigation" id="navbar" role="tablist">
+        <button aria-current="page" aria-label="Log" data-tab="log" title="Go to Log tab">
+            <span class="nav-icon">🏋️</span>
+            <span class="nav-label">Log</span>
+        </button>
+        <button aria-label="Summary" data-tab="summary" title="Go to Summary tab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Summary</span>
+        </button>
+        <button aria-label="Performance" data-tab="performance" title="Go to Performance tab">
+            <span class="nav-icon">📈</span>
+            <span class="nav-label">Performance</span>
+        </button>
+        <button aria-label="Settings" data-tab="settings" title="Go to Settings tab">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Settings</span>
+        </button>
+        <button aria-label="Diagnostics" data-tab="diagnostics" title="Go to Diagnostics tab">
+            <span class="nav-icon">🛠️</span>
+            <span class="nav-label">Diagnostics</span>
+        </button>
+        <button aria-label="Appearance" data-tab="preferences" title="Go to Appearance tab">
+            <span class="nav-icon">🎨</span>
+            <span class="nav-label">Appearance</span>
+        </button>
+        <button aria-label="Exercise Library" data-tab="exercises" title="Go to Exercise Library tab">
+            <span class="nav-icon">📚</span>
+            <span class="nav-label">Exercises</span>
+        </button>
+    </nav>
 </div>
 
 <!-- 🏋️ LOG TAB -->
