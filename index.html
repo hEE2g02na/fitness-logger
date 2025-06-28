@@ -51,6 +51,10 @@
             <span class="nav-icon">🎨</span>
             <span class="nav-label">Appearance</span>
         </button>
+        <button aria-label="Exercise Library" data-tab="exercises" title="Go to Exercise Library tab">
+            <span class="nav-icon">📚</span>
+            <span class="nav-label">Exercises</span>
+        </button>
     </nav>
 </div>
 
@@ -346,6 +350,18 @@
         <button style="margin-top:1em;" type="submit">Save Appearance</button>
         <div id="preferencesStatus" style="margin-top:0.7em;color:#4CAF50;"></div>
     </form>
+</div>
+
+<!-- 📚 EXERCISE LIBRARY TAB -->
+<div class="tab" data-tab="exercises">
+    <h2>Exercise Library</h2>
+    <section id="exerciseLibrary">
+        <input id="exerciseSearch" placeholder="Search exercises..."
+               style="margin-bottom:1em;width:100%;padding:0.7em;font-size:1em;"
+               type="text"/>
+        <div id="exerciseList"
+             style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2em;"></div>
+    </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -514,6 +514,130 @@ function renderCircuitExercises() {
             ex.tags = parseTags(e.target.value);
         };
         circuitExercisesDiv.appendChild(tr);
+// --- EXERCISE LIBRARY DATA ---
+        const EXERCISE_LIBRARY = [
+            {
+                name: "Bench Press",
+                category: "Strength",
+                tags: ["chest", "push", "barbell"],
+                instructions: "Lie on a bench, grip the bar slightly wider than shoulder-width, lower to chest, press up.",
+                img: "https://assets.fitnesslogger.app/exercises/bench-press.jpg"
+            },
+            {
+                name: "Squat",
+                category: "Strength",
+                tags: ["legs", "barbell", "compound"],
+                instructions: "Stand with feet shoulder-width, bar on upper back, squat down keeping chest up, drive up.",
+                img: "https://assets.fitnesslogger.app/exercises/squat.jpg"
+            },
+            {
+                name: "Deadlift",
+                category: "Strength",
+                tags: ["back", "legs", "barbell", "pull"],
+                instructions: "Stand with feet hip-width, grip bar, keep back flat, lift by extending hips and knees.",
+                img: "https://assets.fitnesslogger.app/exercises/deadlift.jpg"
+            },
+            {
+                name: "Push Up",
+                category: "Strength",
+                tags: ["chest", "push", "bodyweight"],
+                instructions: "Start in plank, lower chest to floor, keep elbows at 45°, push back up.",
+                img: "https://assets.fitnesslogger.app/exercises/push-up.jpg"
+            },
+            {
+                name: "Pull Up",
+                category: "Strength",
+                tags: ["back", "pull", "bodyweight"],
+                instructions: "Hang from bar, pull chin above bar, lower with control.",
+                img: "https://assets.fitnesslogger.app/exercises/pull-up.jpg"
+            },
+            {
+                name: "Plank",
+                category: "Flexibility",
+                tags: ["core", "bodyweight"],
+                instructions: "Hold a straight line from head to heels, elbows under shoulders, brace core.",
+                img: "https://assets.fitnesslogger.app/exercises/plank.jpg"
+            },
+            {
+                name: "Bicep Curl",
+                category: "Strength",
+                tags: ["arms", "dumbbell", "isolation"],
+                instructions: "Hold dumbbells, curl up keeping elbows at sides, lower slowly.",
+                img: "https://assets.fitnesslogger.app/exercises/bicep-curl.jpg"
+            },
+            {
+                name: "Tricep Dip",
+                category: "Strength",
+                tags: ["arms", "push", "bodyweight"],
+                instructions: "Hands on bench, lower body by bending elbows, press up.",
+                img: "https://assets.fitnesslogger.app/exercises/tricep-dip.jpg"
+            },
+            {
+                name: "Lunge",
+                category: "Strength",
+                tags: ["legs", "bodyweight"],
+                instructions: "Step forward, lower until both knees at 90°, push back to start.",
+                img: "https://assets.fitnesslogger.app/exercises/lunge.jpg"
+            },
+            {
+                name: "Burpee",
+                category: "Cardio",
+                tags: ["full body", "bodyweight", "cardio"],
+                instructions: "Squat, kick feet back, push up, jump up.",
+                img: "https://assets.fitnesslogger.app/exercises/burpee.jpg"
+            },
+            {
+                name: "Jump Rope",
+                category: "Cardio",
+                tags: ["cardio", "conditioning"],
+                instructions: "Jump over rope with both feet, keep elbows close, turn rope with wrists.",
+                img: "https://assets.fitnesslogger.app/exercises/jump-rope.jpg"
+            },
+            {
+                name: "Mountain Climber",
+                category: "Cardio",
+                tags: ["core", "cardio", "bodyweight"],
+                instructions: "Start in plank, alternate driving knees to chest quickly.",
+                img: "https://assets.fitnesslogger.app/exercises/mountain-climber.jpg"
+            }
+            // Add more as needed
+        ];
+
+// --- EXERCISE LIBRARY UI ---
+        const exerciseSearch = document.getElementById("exerciseSearch");
+        const exerciseList = document.getElementById("exerciseList");
+
+        function renderExerciseLibrary(filter = "") {
+            if (!exerciseList) return;
+            const q = (filter || "").toLowerCase();
+            const filtered = EXERCISE_LIBRARY.filter(ex =>
+                ex.name.toLowerCase().includes(q) ||
+                ex.category.toLowerCase().includes(q) ||
+                (ex.tags && ex.tags.some(tag => tag.includes(q)))
+            );
+            exerciseList.innerHTML = filtered.length
+                ? filtered.map(ex => `
+            <div class="exercise-card">
+                <div class="exercise-card-title">${ex.name}</div>
+                <img class="exercise-card-img" src="${ex.img}" alt="${ex.name} image" loading="lazy" />
+                <div class="exercise-card-category">${ex.category}</div>
+                <div class="exercise-card-instructions">${ex.instructions}</div>
+                <div class="exercise-card-tags">${ex.tags.map(t => "#" + t).join(" ")}</div>
+            </div>
+        `).join("")
+                : `<div style="grid-column:1/-1;text-align:center;color:#888;">No exercises found.</div>`;
+        }
+
+        if (exerciseSearch) {
+            exerciseSearch.addEventListener("input", e => {
+                renderExerciseLibrary(e.target.value);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderExerciseLibrary();
+        });
+
     });
 }
 
