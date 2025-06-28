@@ -251,6 +251,9 @@ body.dark #performanceSummary {
     display: flex;
     justify-content: center;
     pointer-events: none;
+    /* Move up above iPhone home bar */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    box-sizing: border-box;
 }
 
 #navbar {
@@ -359,7 +362,8 @@ body.dark #performanceSummary {
 }
 
 body.has-bottomnav {
-    padding-bottom: clamp(80px, 12vw, 110px);
+    /* Add extra space for safe area inset */
+    padding-bottom: calc(clamp(80px, 12vw, 110px) + env(safe-area-inset-bottom, 0px));
 }
 
 /* === Responsive Layout === */
@@ -683,6 +687,94 @@ body.dark #diagnosticsOutput {
     background: #232323;
     color: #eee;
     border-color: #444;
+}
+
+/* === Exercise Library === */
+#exerciseLibrary {
+    background: #f9f9f9;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+body.dark #exerciseLibrary {
+    background: #232323;
+}
+
+#exerciseList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2em;
+}
+
+.exercise-card {
+    background: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: box-shadow 0.2s;
+    min-height: 320px;
+}
+
+body.dark .exercise-card {
+    background: #2a2a2a;
+}
+
+.exercise-card:hover {
+    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.15);
+}
+
+.exercise-card-title {
+    font-size: 1.15em;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    color: var(--primary);
+}
+
+.exercise-card-img {
+    width: 100%;
+    max-width: 220px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 0.7em;
+    background: #e0e0e0;
+    align-self: center;
+}
+
+.exercise-card-category {
+    font-size: 0.97em;
+    color: #666;
+    margin-bottom: 0.5em;
+}
+
+body.dark .exercise-card-category {
+    color: #aaa;
+}
+
+.exercise-card-instructions {
+    font-size: 0.98em;
+    margin-bottom: 0.5em;
+    color: #222;
+}
+
+body.dark .exercise-card-instructions {
+    color: #eee;
+}
+
+.exercise-card-tags {
+    font-size: 0.92em;
+    color: #888;
+    margin-top: auto;
+    margin-bottom: 0.2em;
+}
+
+body.dark .exercise-card-tags {
+    color: #bbb;
 }
 
 /* Optional: Style the scrollbar for Webkit browsers */
