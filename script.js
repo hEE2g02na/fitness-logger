@@ -1216,3 +1216,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // To run the test, call testTabSwitcher() from the browser console if needed.
 });
+
+// --- SLIDING NAVBAR FOR MOBILE ---
+const navbarToggle = document.getElementById("navbarToggle");
+const navbarSlideContainer = document.querySelector(".navbar-slide-container");
+
+function closeNavbarSlide() {
+    document.body.classList.remove("navbar-open");
+    if (navbarSlideContainer) navbarSlideContainer.classList.remove("active");
+    if (navbarToggle) navbarToggle.setAttribute("aria-label", "Show navigation");
+    if (navbarToggle) document.getElementById("navbarToggleIcon").textContent = "\u2630";
+}
+
+function openNavbarSlide() {
+    document.body.classList.add("navbar-open");
+    if (navbarSlideContainer) navbarSlideContainer.classList.add("active");
+    if (navbarToggle) navbarToggle.setAttribute("aria-label", "Hide navigation");
+    if (navbarToggle) document.getElementById("navbarToggleIcon").textContent = "\u2715";
+}
+
+if (navbarToggle && navbarSlideContainer) {
+    navbarToggle.addEventListener("click", () => {
+        if (navbarSlideContainer.classList.contains("active")) {
+            closeNavbarSlide();
+        } else {
+            openNavbarSlide();
+        }
+    });
+
+    // Close navbar when clicking outside (on overlay)
+    document.addEventListener("click", (e) => {
+        if (
+            document.body.classList.contains("navbar-open") &&
+            !navbarSlideContainer.contains(e.target) &&
+            e.target !== navbarToggle
+        ) {
+            closeNavbarSlide();
+        }
+    });
+
+    // Optional: close on ESC key
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && document.body.classList.contains("navbar-open")) {
+            closeNavbarSlide();
+        }
+    });
+}
