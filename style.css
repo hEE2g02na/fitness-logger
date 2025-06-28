@@ -777,16 +777,137 @@ body.dark .exercise-card-tags {
     color: #bbb;
 }
 
-/* Optional: Style the scrollbar for Webkit browsers */
-#navbar::-webkit-scrollbar {
-    height: 6px;
+/* === Horizontal Slide-Out Navbar for Mobile === */
+.navbar-slideout-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    z-index: 1050;
+    pointer-events: none;
+    transition: width 0.35s cubic-bezier(.4, 0, .2, 1), box-shadow 0.25s;
+    overflow: hidden;
 }
 
-#navbar::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 3px;
+.navbar-slideout-container.active {
+    width: 90vw;
+    max-width: 340px;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.18);
+    pointer-events: auto;
 }
 
-#navbar::-webkit-scrollbar-track {
-    background: transparent;
+.navbar-slideout-container .navbar-container {
+    height: 100%;
+    background: var(--primary);
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding-top: 1.5em;
+    min-width: 220px;
+    width: 100%;
+    pointer-events: auto;
+}
+
+.navbar-slideout-container #navbar {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: auto;
+    width: 100%;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    overflow-x: visible;
+    overflow-y: auto;
+}
+
+.navbar-slideout-container #navbar button {
+    min-width: 0;
+    width: 100%;
+    border-radius: 0;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 1.1em 1.2em;
+    font-size: 1.1em;
+    gap: 0.7em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-slideout-container #navbar button .nav-icon {
+    font-size: 1.5em;
+}
+
+.navbar-slideout-container #navbar button .nav-label {
+    font-size: 1em;
+    margin-top: 0;
+}
+
+@media (max-width: 700px) {
+    .navbar-container {
+        display: none !important;
+    }
+
+    #navbarToggle {
+        display: flex !important;
+    }
+
+    .navbar-slideout-container {
+        display: block;
+    }
+
+    body.navbar-open {
+        overflow: hidden;
+    }
+}
+
+@media (min-width: 701px) {
+    #navbarToggle {
+        display: none !important;
+    }
+
+    .navbar-slideout-container {
+        display: none !important;
+    }
+
+    .navbar-container {
+        display: flex !important;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1001;
+        background: transparent;
+        width: 100vw;
+        justify-content: center;
+        pointer-events: none;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+        box-sizing: border-box;
+    }
+
+    #navbar {
+        pointer-events: auto;
+        width: 100%;
+        max-width: 600px;
+        min-width: 0;
+        margin: 0 auto;
+        background: var(--primary);
+        display: flex;
+        justify-content: space-around;
+        align-items: stretch;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+        border-top-left-radius: var(--border-radius);
+        border-top-right-radius: var(--border-radius);
+        height: clamp(56px, 8vw, 72px);
+        padding: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+    }
 }
