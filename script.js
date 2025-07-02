@@ -1,12 +1,9 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
     collection,
-    doc,
     enableIndexedDbPersistence,
-    getDoc,
     getDocs,
-    getFirestore,
-    setDoc
+    getFirestore
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Firebase config
@@ -1120,295 +1117,159 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- PREFERENCES TAB LOGIC ---
+    // --- PREFERENCES TAB LOGIC (Appearance, except navbar reorder) ---
     document.addEventListener('DOMContentLoaded', () => {
-        const prefForm = document.getElementById("preferencesForm");
-        const prefTheme = document.getElementById("prefTheme");
-        const prefFontSize = document.getElementById("prefFontSize");
-        const prefPrimaryColor = document.getElementById("prefPrimaryColor");
-        const prefChartColor = document.getElementById("prefChartColor");
-        const prefRounded = document.getElementById("prefRounded");
-        const prefCompact = document.getElementById("prefCompact");
-        const prefDefaultCategory = document.getElementById("prefDefaultCategory");
-        const prefChartType = document.getElementById("prefChartType");
-        const prefStatus = document.getElementById("preferencesStatus");
-
-        // --- New customization controls ---
-        const prefFontFamily = document.getElementById("prefFontFamily"); // e.g. select
-        const prefShowGridlines = document.getElementById("prefShowGridlines"); // e.g. checkbox
-        const prefChartAnimation = document.getElementById("prefChartAnimation"); // e.g. checkbox
-        const prefSidebarPosition = document.getElementById("prefSidebarPosition"); // e.g. select
-        const prefAccentColor = document.getElementById("prefAccentColor"); // e.g. color input
-
-        // --- New appearance controls ---
-        const prefBorderRadius = document.getElementById("prefBorderRadius");
-        const borderRadiusValue = document.getElementById("borderRadiusValue");
-        const prefShadow = document.getElementById("prefShadow");
-        const shadowValue = document.getElementById("shadowValue");
-        const prefTransition = document.getElementById("prefTransition");
-        const transitionValue = document.getElementById("transitionValue");
-
-        // Show live value for sliders
-        if (prefBorderRadius && borderRadiusValue) {
-            prefBorderRadius.addEventListener("input", () => {
-                borderRadiusValue.textContent = prefBorderRadius.value + "px";
-            });
-        }
-        if (prefShadow && shadowValue) {
-            prefShadow.addEventListener("input", () => {
-                shadowValue.textContent = prefShadow.value + "px";
-            });
-        }
-        if (prefTransition && transitionValue) {
-            prefTransition.addEventListener("input", () => {
-                transitionValue.textContent = prefTransition.value + "s";
-            });
-        }
-
-        // Load preferences from localStorage
-        function loadPreferences() {
-            try {
-                return JSON.parse(localStorage.getItem("fitnessPreferences")) || {};
-            } catch {
-                return {};
-            }
-        }
-
-        // Save preferences to localStorage
-        function savePreferences(prefs) {
-            localStorage.setItem("fitnessPreferences", JSON.stringify(prefs));
-        }
-
-        // Apply preferences to UI
-        function applyPreferences(prefs) {
-            // Theme
-            if (prefs.theme === "dark") {
-                document.body.classList.add("dark");
-            } else if (prefs.theme === "light") {
-                document.body.classList.remove("dark");
-            } else {
-                document.body.classList.toggle("dark", window.matchMedia("(prefers-color-scheme: dark)").matches);
-            }
-            // Font size
-            document.body.style.fontSize =
-                prefs.fontSize === "large" ? "1.2em" :
-                    prefs.fontSize === "xlarge" ? "1.4em" : "";
-            // Primary color
-            document.documentElement.style.setProperty('--primary-color', prefs.primaryColor || "#4CAF50");
-            // Chart color (used in drawChart/drawMainChart)
-            window._userChartColor = prefs.chartColor || "#4CAF50";
-            // Rounded corners
-            if (prefs.rounded) {
-                document.body.classList.add("rounded");
-            } else {
-                document.body.classList.remove("rounded");
-            }
-            // Compact layout
-            if (prefs.compact) {
-                document.body.classList.add("compact");
-            } else {
-                document.body.classList.remove("compact");
-            }
-            // Default category for log form
-            if (prefs.defaultCategory && form && form.category) {
-                form.category.value = prefs.defaultCategory;
-            }
-            // Chart type (for future use)
-            // You can use prefs.chartType in your chart rendering logic if desired
-
-            // --- New preferences ---
-            // Font family
-            if (prefs.fontFamily) {
-                document.body.style.fontFamily = prefs.fontFamily;
-            } else {
-                document.body.style.fontFamily = "";
-            }
-            // Chart gridlines
-            window._showChartGridlines = prefs.showGridlines !== false; // default true
-            // Chart animation
-            window._chartAnimation = prefs.chartAnimation !== false; // default true
-            // Sidebar position
-            if (prefs.sidebarPosition === "right") {
-                document.body.classList.add("sidebar-right");
-                document.body.classList.remove("sidebar-left");
-            } else {
-                document.body.classList.add("sidebar-left");
-                document.body.classList.remove("sidebar-right");
-            }
-            // Accent color
-            if (prefs.accentColor) {
-                document.documentElement.style.setProperty('--accent-color', prefs.accentColor);
-            }
-            // Border radius
-            if (typeof prefs.borderRadius !== "undefined") {
-                document.documentElement.style.setProperty('--border-radius', prefs.borderRadius + "px");
-            }
-            // Shadow
-            if (typeof prefs.shadow !== "undefined") {
-                document.documentElement.style.setProperty('--shadow', `0 2px ${prefs.shadow}px rgba(0,0,0,0.1)`);
-            }
-            // Transition
-            if (typeof prefs.transition !== "undefined") {
-                document.documentElement.style.setProperty('--transition', `all ${prefs.transition}s ease-in-out`);
-            }
-        }
-
-        // Initialize preferences form with saved values
-        if (prefForm && prefTheme && prefFontSize && prefPrimaryColor && prefChartColor && prefRounded && prefCompact && prefDefaultCategory && prefChartType) {
-            const prefs = loadPreferences();
-            if (prefs.theme) prefTheme.value = prefs.theme;
-            if (prefs.fontSize) prefFontSize.value = prefs.fontSize;
-            if (prefs.primaryColor) prefPrimaryColor.value = prefs.primaryColor;
-            if (prefs.chartColor) prefChartColor.value = prefs.chartColor;
-            if (prefs.rounded) prefRounded.checked = !!prefs.rounded;
-            if (prefs.compact) prefCompact.checked = !!prefs.compact;
-            if (prefs.defaultCategory) prefDefaultCategory.value = prefs.defaultCategory;
-            if (prefs.chartType) prefChartType.value = prefs.chartType;
-
-            // --- New preferences ---
-            if (prefFontFamily && prefs.fontFamily) prefFontFamily.value = prefs.fontFamily;
-            if (prefShowGridlines) prefShowGridlines.checked = prefs.showGridlines !== false;
-            if (prefChartAnimation) prefChartAnimation.checked = prefs.chartAnimation !== false;
-            if (prefSidebarPosition && prefs.sidebarPosition) prefSidebarPosition.value = prefs.sidebarPosition;
-            if (prefAccentColor && prefs.accentColor) prefAccentColor.value = prefs.accentColor;
-            if (prefBorderRadius && typeof prefs.borderRadius !== "undefined") {
-                prefBorderRadius.value = prefs.borderRadius;
-                if (borderRadiusValue) borderRadiusValue.textContent = prefs.borderRadius + "px";
-            }
-            if (prefShadow && typeof prefs.shadow !== "undefined") {
-                prefShadow.value = prefs.shadow;
-                if (shadowValue) shadowValue.textContent = prefs.shadow + "px";
-            }
-            if (prefTransition && typeof prefs.transition !== "undefined") {
-                prefTransition.value = prefs.transition;
-                if (transitionValue) transitionValue.textContent = prefs.transition + "s";
-            }
-
-            applyPreferences(prefs);
-
-            prefForm.addEventListener("submit", e => {
-                e.preventDefault();
-                const newPrefs = {
-                    theme: prefTheme.value,
-                    fontSize: prefFontSize.value,
-                    primaryColor: prefPrimaryColor.value,
-                    chartColor: prefChartColor.value,
-                    rounded: prefRounded.checked,
-                    compact: prefCompact.checked,
-                    defaultCategory: prefDefaultCategory.value,
-                    chartType: prefChartType.value,
-                    // --- New preferences ---
-                    fontFamily: prefFontFamily ? prefFontFamily.value : "",
-                    showGridlines: prefShowGridlines ? prefShowGridlines.checked : true,
-                    chartAnimation: prefChartAnimation ? prefChartAnimation.checked : true,
-                    sidebarPosition: prefSidebarPosition ? prefSidebarPosition.value : "left",
-                    accentColor: prefAccentColor ? prefAccentColor.value : "",
-                    borderRadius: prefBorderRadius ? parseInt(prefBorderRadius.value) : 8,
-                    shadow: prefShadow ? parseInt(prefShadow.value) : 8,
-                    transition: prefTransition ? parseFloat(prefTransition.value) : 0.25
-                };
-                savePreferences(newPrefs);
-                applyPreferences(newPrefs);
-                prefStatus.textContent = "Appearance saved!";
-                setTimeout(() => {
-                    prefStatus.textContent = "";
-                }, 1500);
-            });
-
-            // Apply theme and appearance immediately on change
-            [
-                prefTheme, prefFontSize, prefPrimaryColor, prefChartColor, prefRounded, prefCompact,
-                prefFontFamily, prefShowGridlines, prefChartAnimation, prefSidebarPosition, prefAccentColor,
-                prefBorderRadius, prefShadow, prefTransition
-            ].forEach(el => {
-                if (el) {
-                    el.addEventListener("change", () => {
-                        applyPreferences({
-                            theme: prefTheme.value,
-                            fontSize: prefFontSize.value,
-                            primaryColor: prefPrimaryColor.value,
-                            chartColor: prefChartColor.value,
-                            rounded: prefRounded.checked,
-                            compact: prefCompact.checked,
-                            defaultCategory: prefDefaultCategory.value,
-                            chartType: prefChartType.value,
-                            fontFamily: prefFontFamily ? prefFontFamily.value : "",
-                            showGridlines: prefShowGridlines ? prefShowGridlines.checked : true,
-                            chartAnimation: prefChartAnimation ? prefChartAnimation.checked : true,
-                            sidebarPosition: prefSidebarPosition ? prefSidebarPosition.value : "left",
-                            accentColor: prefAccentColor ? prefAccentColor.value : "",
-                            borderRadius: prefBorderRadius ? parseInt(prefBorderRadius.value) : 8,
-                            shadow: prefShadow ? parseInt(prefShadow.value) : 8,
-                            transition: prefTransition ? parseFloat(prefTransition.value) : 0.25
-                        });
-                    });
-                }
-            });
-        }
+        // Remove all appearance settings logic except navbar reorder
+        // (No-op: all appearance settings except navbar reorder removed)
     });
 
-    // --- Update chart rendering to use new preferences ---
-    function drawChart(data) {
-        const ctx = chartCanvas.getContext("2d");
-        if (window.chartInstance) window.chartInstance.destroy();
-        window.chartInstance = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: data.map(log => log.date),
-                datasets: [{
-                    label: "Volume Lifted",
-                    data: data.map(log => log.sets * log.reps * log.weight),
-                    backgroundColor: window._userChartColor || "#4CAF50"
-                }]
-            },
-            options: {
-                responsive: true,
-                animation: window._chartAnimation !== false,
-                scales: {
-                    x: {
-                        title: {display: true, text: "Date"},
-                        grid: {display: window._showChartGridlines !== false}
-                    },
-                    y: {
-                        title: {display: true, text: "Total Volume (lbs)"},
-                        grid: {display: window._showChartGridlines !== false}
+    // --- NAVBAR ORDER LOGIC (drag-and-drop on nav bar itself) ---
+    const NAVBAR_DEFAULT_ORDER = [
+        {tab: "log", icon: "🏋️", label: "Log", aria: "Log"},
+        {tab: "summary", icon: "📊", label: "Summary", aria: "Summary"},
+        {tab: "performance", icon: "📈", label: "Performance", aria: "Performance"},
+        {tab: "settings", icon: "⚙️", label: "Settings", aria: "Settings"},
+        {tab: "diagnostics", icon: "🛠️", label: "Diagnostics", aria: "Diagnostics"},
+        {tab: "preferences", icon: "🎨", label: "Appearance", aria: "Appearance"},
+        {tab: "exercises", icon: "📚", label: "Exercises", aria: "Exercise Library"}
+    ];
+
+    function loadNavbarOrder() {
+        try {
+            const stored = JSON.parse(localStorage.getItem("navbarOrder"));
+            if (Array.isArray(stored) && stored.length === NAVBAR_DEFAULT_ORDER.length) return stored;
+        } catch {
+        }
+        return NAVBAR_DEFAULT_ORDER;
+    }
+
+    function saveNavbarOrder(order) {
+        localStorage.setItem("navbarOrder", JSON.stringify(order));
+    }
+
+    function updateAllNavbars() {
+        // Update both navbars (desktop and mobile)
+        document.querySelectorAll('.navbar-container, .navbar-slideout-container .navbar-container').forEach(navContainer => {
+            const nav = navContainer.querySelector("#navbar");
+            if (!nav) return;
+            nav.innerHTML = "";
+            const order = loadNavbarOrder();
+            order.forEach((item, idx) => {
+                const btn = document.createElement("button");
+                btn.setAttribute("aria-label", item.aria);
+                btn.setAttribute("data-tab", item.tab);
+                btn.setAttribute("title", `Go to ${item.label} tab`);
+                btn.innerHTML = `<span class="nav-icon">${item.icon}</span><span class="nav-label">${item.label}</span>`;
+                btn.dataset.idx = idx;
+                nav.appendChild(btn);
+            });
+            // Restore aria-current to the active tab
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab) {
+                const tabName = activeTab.getAttribute('data-tab');
+                nav.querySelectorAll('button[data-tab]').forEach(btn => {
+                    if (btn.getAttribute('data-tab') === tabName) {
+                        btn.setAttribute('aria-current', 'page');
+                    } else {
+                        btn.removeAttribute('aria-current');
                     }
-                }
+                });
             }
+            enableNavbarDragAndDrop(nav);
         });
     }
 
-    // Test script for tab switcher (call manually if needed)
-    function testTabSwitcher() {
-        const tabButtons = document.querySelectorAll('button[data-tab]');
-        const tabs = document.querySelectorAll('.tab');
+    // --- Enable drag-and-drop on nav bar buttons via long-press ---
+    function enableNavbarDragAndDrop(nav) {
+        let dragIdx = null;
+        let dragBtn = null;
+        let dragOverIdx = null;
+        let longPressTimer = null;
+        let isDragging = false;
 
-        tabButtons.forEach((button) => {
-            const tabName = button.getAttribute('data-tab');
-            button.click();
-            console.assert(
-                button.getAttribute('aria-current') === 'page',
-                `Failed: Button for tab "${tabName}" should have aria-current="page".`
-            );
-            const activeTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
-            console.assert(
-                activeTab.classList.contains('active'),
-                `Failed: Tab "${tabName}" should be active.`
-            );
-            tabs.forEach((tab) => {
-                if (tab !== activeTab) {
-                    console.assert(
-                        !tab.classList.contains('active'),
-                        `Failed: Tab "${tab.getAttribute('data-tab')}" should not be active.`
-                    );
-                }
+        nav.querySelectorAll("button[data-tab]").forEach(btn => {
+            btn.draggable = false; // Default: not draggable
+
+            // --- Long-press to enable drag ---
+            const startLongPress = (e) => {
+                if (isDragging) return;
+                longPressTimer = setTimeout(() => {
+                    btn.draggable = true;
+                    btn.classList.add("drag-ready");
+                    btn.dispatchEvent(new DragEvent("dragstart", {
+                        bubbles: true,
+                        cancelable: true,
+                        dataTransfer: new DataTransfer()
+                    }));
+                }, 400);
+            };
+            const cancelLongPress = () => {
+                clearTimeout(longPressTimer);
+            };
+
+            btn.addEventListener("mousedown", startLongPress);
+            btn.addEventListener("touchstart", startLongPress);
+            btn.addEventListener("mouseup", cancelLongPress);
+            btn.addEventListener("mouseleave", cancelLongPress);
+            btn.addEventListener("touchend", cancelLongPress);
+            btn.addEventListener("touchcancel", cancelLongPress);
+
+            // --- Drag events ---
+            btn.addEventListener("dragstart", (e) => {
+                dragIdx = Number(btn.dataset.idx);
+                dragBtn = btn;
+                isDragging = true;
+                btn.classList.add("dragging");
+                e.dataTransfer.effectAllowed = "move";
+                // For mobile: visually indicate dragging
+                setTimeout(() => btn.classList.add("dragging"), 0);
+            });
+
+            btn.addEventListener("dragend", () => {
+                isDragging = false;
+                dragIdx = null;
+                dragBtn = null;
+                nav.querySelectorAll("button").forEach(b => {
+                    b.classList.remove("dragging", "drag-over", "drag-ready");
+                    b.draggable = false;
+                });
+            });
+
+            btn.addEventListener("dragover", (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                dragOverIdx = Number(btn.dataset.idx);
+                nav.querySelectorAll("button").forEach(b => b.classList.remove("drag-over"));
+                btn.classList.add("drag-over");
+            });
+
+            btn.addEventListener("dragleave", () => {
+                btn.classList.remove("drag-over");
+            });
+
+            btn.addEventListener("drop", (e) => {
+                e.preventDefault();
+                if (dragIdx === null || dragOverIdx === null || dragIdx === dragOverIdx) return;
+                const order = loadNavbarOrder();
+                const [moved] = order.splice(dragIdx, 1);
+                order.splice(dragOverIdx, 0, moved);
+                saveNavbarOrder(order);
+                updateAllNavbars();
             });
         });
-
-        console.log('Tab switcher tests completed.');
     }
 
-    // To run the test, call testTabSwitcher() from the browser console if needed.
+    // Initial render and update
+    document.addEventListener("DOMContentLoaded", () => {
+        updateAllNavbars();
+    });
+
+    // Listen for navbar order changes from other tabs/windows
+    window.addEventListener("storage", e => {
+        if (e.key === "navbarOrder") {
+            updateAllNavbars();
+        }
+    });
 });
 
 // --- SLIDE-OUT NAVBAR FOR MOBILE ---
@@ -1470,314 +1331,5 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && document.body.classList.contains("navbar-open")) {
         closeNavbarSlideout();
-    }
-});
-
-// --- WORKOUT TEMPLATES LOGIC ---
-function loadTemplates() {
-    try {
-        return JSON.parse(localStorage.getItem("workoutTemplates")) || [];
-    } catch {
-        return [];
-    }
-}
-
-function saveTemplates(templates) {
-    localStorage.setItem("workoutTemplates", JSON.stringify(templates));
-}
-
-function renderTemplates() {
-    if (!templateList) return;
-    const templates = loadTemplates();
-    templateList.innerHTML = templates.length
-        ? templates.map((tpl, idx) => `
-            <li>
-                <span>
-                    <b>${tpl.name}</b>
-                    <span style="color:#888;font-size:0.95em;">
-                        (${tpl.isCircuit ? "Circuit" : "Single"})
-                    </span>
-                </span>
-                <span class="template-actions">
-                    <button type="button" title="Load template" onclick="loadTemplate(${idx})">Load</button>
-                    <button type="button" title="Delete template" onclick="deleteTemplate(${idx})">Delete</button>
-                </span>
-            </li>
-        `).join("")
-        : `<li style="color:#888;">No templates saved.</li>`;
-}
-
-// Save current log form or circuit as template
-if (saveTemplateBtn) {
-    saveTemplateBtn.onclick = () => {
-        const name = (templateNameInput.value || "").trim();
-        if (!name) {
-            alert("Please enter a template name.");
-            return;
-        }
-        let tpl;
-        if (circuitBuilder && circuitBuilder.style.display !== "none" && circuitExercises.length) {
-            // Save circuit as template
-            tpl = {
-                name,
-                isCircuit: true,
-                exercises: circuitExercises.map(ex => ({
-                    exercise: ex.exercise,
-                    sets: ex.sets,
-                    reps: ex.reps,
-                    weight: ex.weight,
-                    category: ex.category,
-                    tags: ex.tags || []
-                }))
-            };
-        } else {
-            // Save single log form as template
-            if (!form.exercise.value || !form.sets.value || !form.reps.value) {
-                alert("Please fill out the exercise, sets, and reps fields.");
-                return;
-            }
-            tpl = {
-                name,
-                isCircuit: false,
-                exercise: form.exercise.value,
-                sets: parseInt(form.sets.value),
-                reps: parseInt(form.reps.value),
-                weight: parseInt(form.weight.value || 0),
-                category: form.category.value,
-                tags: parseTags(tagsInput.value)
-            };
-        }
-        const templates = loadTemplates();
-        templates.push(tpl);
-        saveTemplates(templates);
-        templateNameInput.value = "";
-        renderTemplates();
-    };
-}
-
-// Load template into form or circuit builder
-window.loadTemplate = function (idx) {
-    const templates = loadTemplates();
-    const tpl = templates[idx];
-    if (!tpl) return;
-    if (tpl.isCircuit) {
-        showCircuitBuilder(true);
-        circuitExercises.length = 0;
-        tpl.exercises.forEach(ex => {
-            circuitExercises.push({...ex});
-        });
-        renderCircuitExercises();
-    } else {
-        showCircuitBuilder(false);
-        form.exercise.value = tpl.exercise;
-        form.sets.value = tpl.sets;
-        form.reps.value = tpl.reps;
-        form.weight.value = tpl.weight;
-        form.category.value = tpl.category;
-        tagsInput.value = tagsToString(tpl.tags);
-    }
-    // Optionally highlight the form/circuit builder
-    if (tpl.isCircuit && circuitBuilder) {
-        circuitBuilder.classList.add("highlight");
-        setTimeout(() => circuitBuilder.classList.remove("highlight"), 1000);
-    } else if (form) {
-        form.classList.add("highlight");
-        setTimeout(() => form.classList.remove("highlight"), 1000);
-    }
-};
-
-// Delete template
-window.deleteTemplate = function (idx) {
-    if (!confirm("Delete this template?")) return;
-    const templates = loadTemplates();
-    templates.splice(idx, 1);
-    saveTemplates(templates);
-    renderTemplates();
-};
-
-// Render templates on load
-document.addEventListener("DOMContentLoaded", renderTemplates);
-
-// --- REMINDERS & NOTIFICATIONS LOGIC ---
-function loadReminders() {
-    try {
-        return JSON.parse(localStorage.getItem("fitnessReminders")) || {};
-    } catch {
-        return {};
-    }
-}
-
-function saveReminders(reminders) {
-    localStorage.setItem("fitnessReminders", JSON.stringify(reminders));
-}
-
-function requestNotificationPermission() {
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
-    }
-}
-
-function showNotification(title, body) {
-    if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(title, {body});
-    }
-}
-
-// Schedule workout reminder
-function scheduleWorkoutReminder(timeStr) {
-    if (!timeStr) return;
-    const now = new Date();
-    const [h, m] = timeStr.split(":").map(Number);
-    const next = new Date();
-    next.setHours(h, m, 0, 0);
-    if (next < now) next.setDate(next.getDate() + 1);
-    const ms = next - now;
-    setTimeout(() => {
-        showNotification("🏋️ Workout Reminder", "It's time for your workout!");
-        // Reschedule for next day
-        scheduleWorkoutReminder(timeStr);
-    }, ms);
-}
-
-// Schedule hydration reminder
-function scheduleHydrationReminder(intervalHours) {
-    if (!intervalHours || intervalHours < 1) return;
-    setInterval(() => {
-        showNotification("💧 Hydration Reminder", "Time to drink some water!");
-    }, intervalHours * 60 * 60 * 1000);
-}
-
-// Schedule rest day reminder
-function scheduleRestDayReminder(dayIdx) {
-    if (dayIdx === "" || dayIdx === null || dayIdx === undefined) return;
-    const now = new Date();
-    const todayIdx = now.getDay();
-    let daysUntil = (parseInt(dayIdx) - todayIdx + 7) % 7;
-    if (daysUntil === 0) daysUntil = 7;
-    const ms = daysUntil * 24 * 60 * 60 * 1000;
-    setTimeout(() => {
-        showNotification("🛌 Rest Day Reminder", "Today is your scheduled rest day!");
-        // Reschedule for next week
-        scheduleRestDayReminder(dayIdx);
-    }, ms);
-}
-
-// Load reminders on page load
-document.addEventListener("DOMContentLoaded", () => {
-    const reminders = loadReminders();
-    if (reminderWorkoutTime && reminders.workoutTime) reminderWorkoutTime.value = reminders.workoutTime;
-    if (reminderHydrationInterval && reminders.hydrationInterval) reminderHydrationInterval.value = reminders.hydrationInterval;
-    if (reminderRestDay && reminders.restDay !== undefined) reminderRestDay.value = reminders.restDay;
-
-    // Schedule reminders if permission granted
-    if ("Notification" in window && Notification.permission === "granted") {
-        if (reminders.workoutTime) scheduleWorkoutReminder(reminders.workoutTime);
-        if (reminders.hydrationInterval) scheduleHydrationReminder(reminders.hydrationInterval);
-        if (reminders.restDay !== "" && reminders.restDay !== undefined) scheduleRestDayReminder(reminders.restDay);
-    }
-});
-
-// Save reminders and schedule notifications
-if (remindersForm) {
-    remindersForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const reminders = {
-            workoutTime: reminderWorkoutTime.value,
-            hydrationInterval: parseInt(reminderHydrationInterval.value) || "",
-            restDay: reminderRestDay.value
-        };
-        saveReminders(reminders);
-        remindersStatus.textContent = "Reminders saved!";
-        requestNotificationPermission();
-        // Schedule reminders if permission granted
-        if ("Notification" in window && Notification.permission === "granted") {
-            if (reminders.workoutTime) scheduleWorkoutReminder(reminders.workoutTime);
-            if (reminders.hydrationInterval) scheduleHydrationReminder(reminders.hydrationInterval);
-            if (reminders.restDay !== "" && reminders.restDay !== undefined) scheduleRestDayReminder(reminders.restDay);
-        }
-        setTimeout(() => remindersStatus.textContent = "", 1500);
-    });
-}
-
-// --- CLOUD BACKUP & RESTORE ---
-async function backupToCloud() {
-    try {
-        const userId = "localUser"; // Replace with real user ID if you have auth
-        const backupData = {
-            logs,
-            workoutTemplates: loadTemplates(),
-            fitnessGoals: loadGoals(),
-            fitnessPreferences: (() => {
-                try {
-                    return JSON.parse(localStorage.getItem("fitnessPreferences")) || {};
-                } catch {
-                    return {};
-                }
-            })(),
-            fitnessReminders: loadReminders()
-        };
-        await setDoc(doc(db, "backups", userId), backupData);
-        alert("✅ Data backed up to cloud!");
-    } catch (e) {
-        alert("❌ Backup failed: " + (e.message || e));
-    }
-}
-
-async function restoreFromCloud() {
-    try {
-        const userId = "localUser"; // Replace with real user ID if you have auth
-        const snap = await getDoc(doc(db, "backups", userId));
-        if (!snap.exists()) {
-            alert("No backup found in cloud.");
-            return;
-        }
-        const data = snap.data();
-        // Restore logs (overwrite local logs)
-        // You may want to merge instead of overwrite in a real app
-        // For demo, just alert and reload
-        if (data.logs) {
-            // Optionally, upload logs to Firestore logs collection
-            // For now, just alert user
-            alert("Logs restored from cloud. (Reload app to see changes.)");
-        }
-        if (data.workoutTemplates) {
-            localStorage.setItem("workoutTemplates", JSON.stringify(data.workoutTemplates));
-        }
-        if (data.fitnessGoals) {
-            localStorage.setItem("fitnessGoals", JSON.stringify(data.fitnessGoals));
-        }
-        if (data.fitnessPreferences) {
-            localStorage.setItem("fitnessPreferences", JSON.stringify(data.fitnessPreferences));
-        }
-        if (data.fitnessReminders) {
-            localStorage.setItem("fitnessReminders", JSON.stringify(data.fitnessReminders));
-        }
-        alert("✅ Data restored from cloud! Reloading...");
-        location.reload();
-    } catch (e) {
-        alert("❌ Restore failed: " + (e.message || e));
-    }
-}
-
-// Add backup/restore buttons to settings tab
-document.addEventListener("DOMContentLoaded", () => {
-    const exportSection = document.getElementById("exportOptions");
-    if (exportSection && !document.getElementById("backupCloudBtn")) {
-        const backupBtn = document.createElement("button");
-        backupBtn.id = "backupCloudBtn";
-        backupBtn.type = "button";
-        backupBtn.textContent = "Backup to Cloud";
-        backupBtn.title = "Backup your data (logs, templates, goals, preferences) to the cloud";
-        backupBtn.onclick = backupToCloud;
-
-        const restoreBtn = document.createElement("button");
-        restoreBtn.id = "restoreCloudBtn";
-        restoreBtn.type = "button";
-        restoreBtn.textContent = "Restore from Cloud";
-        restoreBtn.title = "Restore your data from the cloud backup";
-        restoreBtn.onclick = restoreFromCloud;
-
-        exportSection.appendChild(backupBtn);
-        exportSection.appendChild(restoreBtn);
     }
 });

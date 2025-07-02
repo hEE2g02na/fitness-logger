@@ -270,11 +270,12 @@ body.dark #performanceSummary {
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
     height: clamp(56px, 8vw, 72px);
-    padding: 0;
-    overflow-x: auto; /* Enable horizontal scrolling */
-    overflow-y: hidden;
-    scrollbar-width: thin; /* For Firefox */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    padding: 0 18px; /* Added horizontal padding for space at ends */
+    /* Remove horizontal scrolling for desktop */
+    overflow-x: visible;
+    overflow-y: visible;
+    /* Ensure highlight/indicator stays within rounded corners */
+    overflow: hidden;
 }
 
 #navbar button {
@@ -286,7 +287,7 @@ body.dark #performanceSummary {
     font-size: clamp(1.1rem, 2.5vw, 1.5rem);
     padding: 0.25em 0 0.1em 0;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, transform 0.2s;
+    transition: background 0.2s, color 0.2s, transform 0.18s cubic-bezier(.4, 0, .2, 1), margin 0.18s cubic-bezier(.4, 0, .2, 1);
     border-radius: 0;
     outline: none;
     height: 100%;
@@ -314,24 +315,60 @@ body.dark #performanceSummary {
     display: block;
 }
 
+/* Scale up the selected tab and bring to front */
 #navbar button:focus,
 #navbar button.active,
 #navbar button[aria-current="page"] {
-    background: var(--accent);
-    color: #222;
+    background: none;
+    color: #fff;
+    z-index: 2;
+    transform: scale(1.18);
+    outline: none;
+    /* No margin for selected tab */
+    margin-left: 0;
+    margin-right: 0;
 }
 
+/* Shift non-selected tabs away from the selected one */
+#navbar button[aria-current="page"] ~ button {
+    /* Tabs after the selected one move right */
+    margin-left: 0.5em;
+}
+
+#navbar button:not([aria-current="page"]) {
+    /* Tabs before the selected one move left */
+    margin-right: 0.5em;
+}
+
+#navbar button[aria-current="page"]:first-child {
+    /* If first tab is selected, don't shift left of it */
+    margin-left: 0;
+}
+
+#navbar button[aria-current="page"]:last-child {
+    /* If last tab is selected, don't shift right of it */
+    margin-right: 0;
+}
+
+/* Prevent double margin on both sides of a non-selected tab */
+#navbar button:not([aria-current="page"]):not(:last-child) {
+    margin-right: 0.5em;
+}
+
+#navbar button:not([aria-current="page"]):not(:first-child) {
+    margin-left: 0;
+}
+
+/* Remove underline indicator */
 #navbar button[aria-current="page"]::after,
 #navbar button.active::after {
-    content: "";
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 25%;
-    right: 25%;
-    height: 4px;
-    border-radius: 2px;
-    background: #fff;
+    display: none !important;
+    content: none !important;
+}
+
+#navbar button {
+    /* Ensure smooth transition for scale and position */
+    transition: background 0.2s, color 0.2s, transform 0.18s cubic-bezier(.4, 0, .2, 1), margin 0.18s cubic-bezier(.4, 0, .2, 1);
 }
 
 #navbar button:hover {
@@ -377,6 +414,13 @@ body.dark #performanceSummary {
     body.navbar-open {
         overflow: hidden;
     }
+
+    .navbar-slideout-container #navbar {
+        /* Remove horizontal scrolling for mobile */
+        overflow-x: visible !important;
+        overflow-y: auto !important;
+        max-height: calc(100vh - 3em);
+    }
 }
 
 @media (min-width: 701px) {
@@ -399,8 +443,9 @@ body.dark #performanceSummary {
         width: 100vw;
         justify-content: center;
         pointer-events: none;
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-        box-sizing: border-box;
+        /* Increase bottom padding so navbar background fills to bottom */
+        padding-bottom: 0; /* Remove previous padding */
+        height: 0; /* Remove height so child can fill */
     }
 
     #navbar {
@@ -414,14 +459,23 @@ body.dark #performanceSummary {
         justify-content: space-around;
         align-items: stretch;
         box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
-        border-top-left-radius: var(--border-radius);
-        border-top-right-radius: var(--border-radius);
+        border-radius: var(--border-radius);
         height: clamp(56px, 8vw, 72px);
-        padding: 0;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: thin;
-        -webkit-overflow-scrolling: touch;
+        padding: 0 18px;
+        overflow-x: visible;
+        overflow-y: visible;
+        /* Add bottom margin to navbar to fill to bottom of viewport */
+        margin-bottom: 0;
+    }
+
+    /* Make navbar fill to the very bottom */
+    .navbar-container {
+        align-items: flex-end;
+        min-height: 0;
+    }
+
+    #navbar {
+        margin-bottom: 0;
     }
 }
 
@@ -724,29 +778,6 @@ body.dark #circuitBuilder {
   pointer-events: none;
 }
 */
-
-.tab[data-tab="diagnostics"] {
-    padding-bottom: 120px;
-}
-
-#diagnosticsOutput {
-    min-height: 3em;
-    margin-bottom: 2em;
-    background: #f8f8f8;
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius);
-    padding: 1em;
-    white-space: pre-wrap;
-    font-size: 1em;
-    color: #222;
-    box-shadow: var(--shadow);
-}
-
-body.dark #diagnosticsOutput {
-    background: #232323;
-    color: #eee;
-    border-color: #444;
-}
 
 /* === Exercise Library === */
 #exerciseLibrary {
@@ -1063,4 +1094,224 @@ body[dir="rtl"] .navbar-slideout-container #navbar button {
     .appearance-section {
         margin-bottom: 1em;
     }
+}
+
+/* === Navbar Reorder List === */
+#navbarReorderList {
+    margin: 0 0 1em 0;
+    padding: 0;
+    list-style: none;
+}
+
+#navbarReorderList li {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 0.5em;
+    padding: 0.7em 1em;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    cursor: grab;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+body.dark #navbarReorderList li {
+    background: #232323;
+    border-color: #444;
+}
+
+#navbarReorderList li.dragging {
+    opacity: 0.6;
+    background: #e0e0e0 !important;
+    color: #222 !important;
+    z-index: 10;
+}
+
+#navbarReorderList .drag-handle {
+    font-size: 1.3em;
+    cursor: grab;
+    margin-right: 0.7em;
+    color: #888;
+    user-select: none;
+}
+
+#navbarReorderList .nav-icon {
+    font-size: 1.2em;
+    margin-right: 0.5em;
+}
+
+#navbarReorderList .nav-label {
+    font-size: 1em;
+    color: #222;
+}
+
+body.dark #navbarReorderList .nav-label {
+    color: #eee;
+}
+
+#navbar button.dragging {
+    opacity: 0.6;
+    background: #e0e0e0 !important;
+    color: #222 !important;
+    z-index: 10;
+}
+
+#navbar button.drag-over {
+    background: #f0f4f8 !important;
+    color: #222 !important;
+    outline: 2px dashed var(--primary);
+}
+
+#navbar button.drag-ready {
+    outline: 2px solid var(--primary);
+    background: #fff !important;
+    color: #222 !important;
+}
+
+.navbar-slideout-container #navbar button.dragging,
+.navbar-slideout-container #navbar button.drag-over,
+.navbar-slideout-container #navbar button.drag-ready {
+    background: #e0e0e0 !important;
+    color: #222 !important;
+    opacity: 0.7;
+}
+
+@media (max-width: 700px) {
+    .navbar-slideout-container #navbar button.dragging,
+    .navbar-slideout-container #navbar button.drag-over,
+    .navbar-slideout-container #navbar button.drag-ready {
+        background: #e0e0e0 !important;
+        color: #222 !important;
+        opacity: 0.7;
+    }
+}
+
+/* Remove old drag UI styles */
+#navbarDrag, #navbarDrag button, #navbarDragStatus {
+    display: none !important;
+}
+
+/* === Tab Content Consistency === */
+.tab {
+    /* Consistent background and spacing for all tabs */
+    background: #f9f9f9;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    box-shadow: var(--shadow);
+    padding: 2em 1.5em 2.5em 1.5em;
+    max-width: 800px;
+    margin: 2.5em auto 3.5em auto; /* Increased bottom margin for navbar space */
+    min-height: 60vh;
+    transition: background 0.25s;
+}
+
+body.dark .tab {
+    background: #232323;
+    color: #eee;
+}
+
+/* Headings inside tabs */
+.tab h1, .tab h2, .tab h3, .tab h4 {
+    text-align: center;
+    margin-top: 0.2em;
+    margin-bottom: 1.2em;
+    color: var(--primary);
+    letter-spacing: 0.01em;
+    font-weight: 700;
+}
+
+body.dark .tab h1,
+body.dark .tab h2,
+body.dark .tab h3,
+body.dark .tab h4 {
+    color: var(--accent);
+}
+
+/* Section spacing inside tabs */
+.tab > section,
+.tab > form,
+.tab > div,
+.tab > ul,
+.tab > table {
+    margin-bottom: 2em;
+    margin-top: 0;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Remove double background for sections inside tab */
+.tab > section,
+.tab > form {
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Remove double margin for first/last child */
+.tab > section:first-child,
+.tab > form:first-child,
+.tab > div:first-child {
+    margin-top: 0;
+}
+
+.tab > section:last-child,
+.tab > form:last-child,
+.tab > div:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive adjustments for tab content */
+@media (max-width: 700px) {
+    .tab {
+        padding: 1.1em 0.5em 2em 0.5em;
+        max-width: 100vw;
+        margin: 1.2em 0 3.5em 0; /* Increased bottom margin for navbar space */
+    }
+
+    .tab > section,
+    .tab > form,
+    .tab > div,
+    .tab > ul,
+    .tab > table {
+        max-width: 100vw;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* === Help Book Tab Styling (override for green bar) === */
+.tab[data-tab="help"] {
+    background: var(--primary);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    box-shadow: var(--shadow);
+    padding-top: 1.5em;
+    padding-bottom: 2.5em;
+    color: #fff;
+}
+
+.tab[data-tab="help"] > section {
+    background: #f0f4f8;
+    margin: 1.5em auto 1.5em auto;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1.2em;
+    max-width: 700px;
+    color: #222;
+}
+
+body.dark .tab[data-tab="help"] > section {
+    background: #232323;
+    color: #eee;
+}
+
+/* Ensure all tab headings are readable on green */
+.tab[data-tab="help"] h2,
+.tab[data-tab="help"] h3,
+.tab[data-tab="help"] h4 {
+    color: #fff;
 }

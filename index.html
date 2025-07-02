@@ -135,10 +135,6 @@
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Settings</span>
             </button>
-            <button aria-label="Diagnostics" data-tab="diagnostics" title="Go to Diagnostics tab">
-                <span class="nav-icon">🛠️</span>
-                <span class="nav-label">Diagnostics</span>
-            </button>
             <button aria-label="Appearance" data-tab="preferences" title="Go to Appearance tab">
                 <span class="nav-icon">🎨</span>
                 <span class="nav-label">Appearance</span>
@@ -146,6 +142,11 @@
             <button aria-label="Exercise Library" data-tab="exercises" title="Go to Exercise Library tab">
                 <span class="nav-icon">📚</span>
                 <span class="nav-label">Exercises</span>
+            </button>
+            <!-- Add Help tab -->
+            <button aria-label="Help" data-tab="help" title="Go to Help Book tab">
+                <span class="nav-icon">📖</span>
+                <span class="nav-label">Help</span>
             </button>
         </nav>
     </div>
@@ -168,10 +169,6 @@
             <span class="nav-icon">⚙️</span>
             <span class="nav-label">Settings</span>
         </button>
-        <button aria-label="Diagnostics" data-tab="diagnostics" title="Go to Diagnostics tab">
-            <span class="nav-icon">🛠️</span>
-            <span class="nav-label">Diagnostics</span>
-        </button>
         <button aria-label="Appearance" data-tab="preferences" title="Go to Appearance tab">
             <span class="nav-icon">🎨</span>
             <span class="nav-label">Appearance</span>
@@ -179,6 +176,11 @@
         <button aria-label="Exercise Library" data-tab="exercises" title="Go to Exercise Library tab">
             <span class="nav-icon">📚</span>
             <span class="nav-label">Exercises</span>
+        </button>
+        <!-- Add Help tab -->
+        <button aria-label="Help" data-tab="help" title="Go to Help Book tab">
+            <span class="nav-icon">📖</span>
+            <span class="nav-label">Help</span>
         </button>
     </nav>
 </div>
@@ -385,161 +387,23 @@
         <button id="exportPDF" title="Export logs as PDF">Export PDF</button>
         <button id="exportExcel" title="Export logs as Excel">Export Excel</button>
     </section>
-</div>
-
-<!-- 🛠️ DIAGNOSTICS TAB -->
-<div class="tab" data-tab="diagnostics">
-    <h2>Diagnostics & Tools</h2>
-    <div id="diagnosticsTools">
-        <button id="diagTestConnection">Test Firestore Connection</button>
-        <button id="diagShowLocalStorage">Show Local Storage</button>
-        <button id="diagClearLocalStorage">Clear Local Storage</button>
-        <button id="diagShowLogsCount">Show Log Count</button>
-        <button id="diagReload">Reload App</button>
-        <!-- New tools -->
-        <button id="diagShowUserAgent">Show User Agent</button>
-        <button id="diagShowScreenSize">Show Screen Size</button>
-        <button id="diagShowAppVersion">Show App Version</button>
-    </div>
-    <div id="diagnosticsOutput"
-         style="margin-top:1em; white-space:pre-wrap; background:#f8f8f8; border:1px solid #ccc; border-radius:6px; padding:1em; min-height:3em;"></div>
-</div>
-
-<!-- ⚙️ PREFERENCES TAB -->
-<div class="tab" data-tab="preferences">
-    <h2>Appearance</h2>
-    <form class="appearance-grid-form" id="preferencesForm" style="max-width:900px;">
-        <div class="appearance-grid">
-            <fieldset class="appearance-section">
-                <legend>Layout & Menus</legend>
-                <label>
-                    Icon Set:
-                    <select id="prefMenuIconSet">
-                        <option value="emoji">Emoji</option>
-                        <option value="material">Material Icons</option>
-                        <option value="fontawesome">Font Awesome</option>
-                    </select>
-                </label>
-                <label>
-                    <input id="prefIconOnly" type="checkbox"/>
-                    Icon-only Navbar (hide labels)
-                </label>
-                <label>
-                    <input checked id="prefShowLabels" type="checkbox"/>
-                    Show Navbar Labels
-                </label>
-                <label>
-                    <input id="prefCompactNavbar" type="checkbox"/>
-                    Compact Navbar/Menu
-                </label>
-                <label>
-                    <input id="prefRTL" type="checkbox"/>
-                    RTL (Right-to-Left) Layout
-                </label>
-            </fieldset>
-            <fieldset class="appearance-section">
-                <legend>Typography</legend>
-                <label>
-                    Font Size:
-                    <select id="prefFontSize">
-                        <option value="normal">Normal</option>
-                        <option value="large">Large</option>
-                        <option value="xlarge">Extra Large</option>
-                    </select>
-                </label>
-                <label>
-                    Font Family:
-                    <select id="prefFontFamily">
-                        <option value="">Default</option>
-                        <option value="system-ui">System UI</option>
-                        <option value="serif">Serif</option>
-                        <option value="monospace">Monospace</option>
-                        <option value="Arial, sans-serif">Arial</option>
-                        <option value="Georgia, serif">Georgia</option>
-                        <option value="Courier New, monospace">Courier New</option>
-                    </select>
-                </label>
-            </fieldset>
-            <fieldset class="appearance-section">
-                <legend>Colors</legend>
-                <label>
-                    Primary Color:
-                    <input id="prefPrimaryColor" type="color" value="#4CAF50"/>
-                </label>
-                <label>
-                    Accent Color:
-                    <input id="prefAccentColor" type="color" value="#81c784"/>
-                </label>
-                <label>
-                    Chart Color:
-                    <input id="prefChartColor" type="color" value="#4CAF50"/>
-                </label>
-            </fieldset>
-            <fieldset class="appearance-section">
-                <legend>Shape & Effects</legend>
-                <label>
-                    Border Radius:
-                    <input id="prefBorderRadius" max="32" min="0" step="1" style="width:120px;vertical-align:middle;"
-                           type="range" value="8"/>
-                    <span id="borderRadiusValue" style="margin-left:0.5em;">8px</span>
-                </label>
-                <label>
-                    Shadow:
-                    <input id="prefShadow" max="32" min="0" step="1" style="width:120px;vertical-align:middle;"
-                           type="range" value="8"/>
-                    <span id="shadowValue" style="margin-left:0.5em;">8px</span>
-                </label>
-                <label>
-                    Transition:
-                    <input id="prefTransition" max="1" min="0" step="0.05" style="width:120px;vertical-align:middle;"
-                           type="range" value="0.25"/>
-                    <span id="transitionValue" style="margin-left:0.5em;">0.25s</span>
-                </label>
-                <label>
-                    <input id="prefRounded" type="checkbox"/>
-                    Rounded Corners
-                </label>
-            </fieldset>
-            <fieldset class="appearance-section">
-                <legend>Charts</legend>
-                <label>
-                    Default Chart Type:
-                    <select id="prefChartType">
-                        <option value="bar">Bar</option>
-                        <option value="line">Line</option>
-                    </select>
-                </label>
-                <label>
-                    <input checked id="prefShowGridlines" type="checkbox"/>
-                    Show Chart Gridlines
-                </label>
-                <label>
-                    <input checked id="prefChartAnimation" type="checkbox"/>
-                    Chart Animation
-                </label>
-            </fieldset>
-            <fieldset class="appearance-section">
-                <legend>Defaults</legend>
-                <label>
-                    Default Category:
-                    <select id="prefDefaultCategory">
-                        <option value="Strength">Strength</option>
-                        <option value="Cardio">Cardio</option>
-                        <option value="Flexibility">Flexibility</option>
-                    </select>
-                </label>
-                <label>
-                    Sidebar Position:
-                    <select id="prefSidebarPosition">
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                    </select>
-                </label>
-            </fieldset>
+    <!-- Diagnostics Section moved here -->
+    <section id="diagnosticsSection" style="margin:1.5em 0;">
+        <h3>🛠️ Diagnostics & Tools</h3>
+        <div id="diagnosticsTools">
+            <button id="diagTestConnection">Test Firestore Connection</button>
+            <button id="diagShowLocalStorage">Show Local Storage</button>
+            <button id="diagClearLocalStorage">Clear Local Storage</button>
+            <button id="diagShowLogsCount">Show Log Count</button>
+            <button id="diagReload">Reload App</button>
+            <!-- New tools -->
+            <button id="diagShowUserAgent">Show User Agent</button>
+            <button id="diagShowScreenSize">Show Screen Size</button>
+            <button id="diagShowAppVersion">Show App Version</button>
         </div>
-        <button style="margin-top:1em;" type="submit">Save Appearance</button>
-        <div id="preferencesStatus" style="margin-top:0.7em;color:#4CAF50;"></div>
-    </form>
+        <div id="diagnosticsOutput"
+             style="margin-top:1em; white-space:pre-wrap; background:#f8f8f8; border:1px solid #ccc; border-radius:6px; padding:1em; min-height:3em;"></div>
+    </section>
 </div>
 
 <!-- 📚 EXERCISE LIBRARY TAB -->
@@ -551,6 +415,44 @@
                type="text"/>
         <div id="exerciseList"
              style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2em;"></div>
+    </section>
+</div>
+
+<!-- 📖 HELP BOOK TAB -->
+<div class="tab" data-tab="help">
+    <h2>📖 Help Book</h2>
+    <section
+            style="background:#f0f4f8; border-radius:8px; padding:1em; margin-bottom:1.5em; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <h3>Getting Started</h3>
+        <ul style="margin:0.5em 0 0 1.2em;">
+            <li><b>Log Workouts:</b> Use the Log tab to record your workouts. You can add single exercises or circuits.
+            </li>
+            <li><b>Exercise Library:</b> Browse or search for exercises in the Exercises tab. Click for details and
+                tips.
+            </li>
+            <li><b>Tags & Categories:</b> Use tags (e.g., "push", "legs") and categories (Strength, Cardio, Flexibility)
+                to organize and filter your workouts.
+            </li>
+            <li><b>Templates & Circuits:</b> Save frequent routines as templates or build circuits for quick logging.
+            </li>
+            <li><b>Progress Tracking:</b> Check the Summary and Performance tabs for charts, streaks, and achievements.
+            </li>
+            <li><b>Settings & Export:</b> Visit the Settings tab for reminders, export options, and diagnostics.</li>
+        </ul>
+        <h3 style="margin-top:1.5em;">FAQ</h3>
+        <ul style="margin:0.5em 0 0 1.2em;">
+            <li><b>How do I add a new exercise?</b> Type the exercise name in the Log tab. It will be saved for future
+                use.
+            </li>
+            <li><b>How do I export my data?</b> Go to Settings &gt; Export Options to download your logs in various
+                formats.
+            </li>
+            <li><b>How do I reset or clear my data?</b> Use the Diagnostics section in Settings to clear local storage.
+            </li>
+            <li><b>Is my data private?</b> Yes, your data is stored securely and only accessible to you.</li>
+        </ul>
+        <h3 style="margin-top:1.5em;">Need More Help?</h3>
+        <p>For feedback or support, contact the developer or visit the project page.</p>
     </section>
 </div>
 
